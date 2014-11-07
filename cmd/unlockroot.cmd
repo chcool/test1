@@ -1,0 +1,2 @@
+shell
+passwd -u root
