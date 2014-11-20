@@ -1,0 +1,48 @@
+hostmap={}
+hostmap['hoch1']='10.243.45.64'
+hostmap['hoch2']='10.243.45.63'
+hostmap['niagara']='10.243.45.65'
+hostmap['niagara-dhcp']='10.243.44.10'
+hostmap['havasu']='10.243.45.66'
+
+hostmap['lamborghini']='10.243.46.15'
+
+hostmap['shana1']='10.2.31.151'
+hostmap['shana2']='10.2.31.152'
+hostmap['shana3']='10.2.31.153'
+hostmap['shana4']='10.2.31.154'
+hostmap['shana5']='10.2.31.155'
+hostmap['shana6']='10.2.31.156'
+
+import json
+EXA_CONF='../exa_conf.json'
+with open(EXA_CONF) as data_file:
+	data=json.load(data_file)
+
+cmdfile_base=data["cmdfile_base"]
+log_base=data["log_base"]
+
+MAX_WAIT=int(data["MAX_WAIT"])
+SLEEP_DL=int(data["SLEEP_DL"])
+SLEEP_RB=int(data["SLEEP_RB"])
+
+MAX_MORE_LEN=int(data["MAX_MORE_LEN"])
+
+import time,datetime
+
+import logging
+
+# logging.basicConfig(filename="test.log",level=logging.DEBUG,format="%(asctime)s " \
+		# "%(levelname)-5.5s [%(name)s %(module)s:%(funcName)s:%(lineno)d]" \
+		# "%(message)s") 
+
+def set_logging(logname):
+	ts=time.time()
+	st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H%M%S')
+
+	#logfile=log_base+logname+st+'.log'
+	logging.basicConfig(filename=logname,filemode='w',level=logging.DEBUG,format="%(asctime)s " \
+"%(levelname)-5.5s [%(name)s %(module)s:%(funcName)s:%(lineno)d]" \
+"%(message)s") 
+	logging.info("in set_logging")
+	print "<<<<<<<<<<<< in set_logging >>>>> logname = "+logname
