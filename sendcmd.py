@@ -1,38 +1,62 @@
-from exalibs import unlock_root,valid_ip
-import connect_remote
-import sys
+import argparse
+import re,sys
 from threading import Thread
+from optparser import getHostlist_fromOpt,parseCmd
+from util.connect_remote import RMT_CONN
+from util.mylog import mylogger
 
-def unlock_root_by_ip(host1,userid='calixsupport',passwd=''):
-	conn1 = connect_remote.RMT_CONN(verbose=1,host=host1,userid=userid,password=passwd,timeout=10,port=22)
-	sess1 = conn1.connect_ssh()
-	
-	if conn1.getSessLogin():
-		res,ret=unlock_root(conn1)
-		if res and ret.find('password expiry information changed') >=0:
-			print "Successfully unlock root for %s !" % host1
-		elif res:
-			print "unexpected unlock root result = %s " % ret
-		else:
-			print "unlock_root return failure"
-	else:
-		print "login to %s failed, abort unlock root for it !" % host1
+def sendcmd(host,cmd,cmdf,username='calixsupport',password=''):
+    #get connection
+    conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10,port=22)
+    sess = conn.connect_ssh()
+    #send command
+    if conn.getSessLogin() and len(cmd) > 1:
+        res,ret = conn.sendcmd(cmd)
+        if res:
+	    mylogger.debug(ret)
+    elif conn.getSessLogin() and len(cmdf) > 0:
+        mylogger.info("cmd file = %s" % cmdf
+)
+        pass
+    else:
+        mylogger.info("%s is not reachable" % host
+)
+        return None
 
-def sendcmd():
-	iplist = sys.argv[1].split(',')
-	print iplist
-	
-	login='calixsupport'
-	
-	for host_ip in iplist:
-		
-		if valid_ip(host_ip):
-			t=Thread(target=unlock_root_by_ip,args=(host_ip,login))	
-			t.start()
-		else:
-			print "%s is not a valid ip !" % host_ip
+    #output result
+       
 
-if __name__=="__main__":
-	optlist= sys.argv
-	print optlist
-	#sendcmd()
+def action():
+    mylogger.info( "###### in sendcmd v2 ########")
+
+#    opthash=parseHostlist()
+#    if opthash.hlist:
+
+    hostlist = getHostlist_fromOpt()
+    if len(hostlist) > 0:
+        mylogger.info("hostlist = %s" % ''.join(hostlist)
+)
+    else:
+        mylogger.error("no hostlist found, abort")
+        sys.exit(2)
+
+    #get cmd -m 'one liner', -f 'cmd file'
+    opthash=parseCmd()
+    command=''
+    commandfile=''
+    if opthash.cmd:
+	mylogger.debug("cmd = %s " % opthash.cmd
+)
+        command = opthash.cmd
+    elif opthash.cmdf:
+        mylogger.info("cmd file = %s " % opthash.cmdf
+)
+        commandfile = opthash.cmdf
+   
+    for host_ip in hostlist:
+        t=Thread(target=sendcmd,args=(host_ip,command,commandfile))
+        t.start() 
+#miao
+    #sendunlock command"
+    pass
+    #return result
