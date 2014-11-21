@@ -14,8 +14,11 @@ hostmap['shana4']='10.2.31.154'
 hostmap['shana5']='10.2.31.155'
 hostmap['shana6']='10.2.31.156'
 
-import json
-EXA_CONF='../exa_conf.json'
+import json,os
+RUN_DIR = os.getcwd()
+
+print "trying to find exa_conf.json in " + RUN_DIR
+EXA_CONF=RUN_DIR+'/exa_conf.json'
 with open(EXA_CONF) as data_file:
 	data=json.load(data_file)
 
