@@ -1,2 +1,0 @@
-shell
-passwd -u root

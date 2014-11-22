@@ -45,8 +45,10 @@ if __name__ == "__main__":
     if len(act_mod) > 0:
         try:
             mod=__import__(act_mod)
-        except ImportError:
+        except ImportError as e:
+           # type, value, traceback = sys.exc_info()
             mylogger.info("import %s failed"% act_mod)
+            mylogger.error("Error details: %s" % str(e))
             sys.exit(2)
     if len(act_func) > 0:
         try:
