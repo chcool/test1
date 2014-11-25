@@ -30,6 +30,14 @@ SLEEP_DL=int(data["SLEEP_DL"])
 SLEEP_RB=int(data["SLEEP_RB"])
 
 MAX_MORE_LEN=int(data["MAX_MORE_LEN"])
+EXPDICT = data['EXPDICT']
+
+from pexpect import EOF as pEOF
+from pexpect import TIMEOUT as pTIMEOUT
+
+pexpect_dict = {"timeout":pTIMEOUT,"eof":pEOF}
+
+EXPDICT.update(pexpect_dict)
 
 import time,datetime
 
@@ -49,3 +57,4 @@ def set_logging(logname):
 "%(message)s") 
 	logging.info("in set_logging")
 	print "<<<<<<<<<<<< in set_logging >>>>> logname = "+logname
+

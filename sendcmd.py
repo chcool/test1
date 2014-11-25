@@ -34,8 +34,7 @@ def action():
 
     hostlist = getHostlist_fromOpt()
     if len(hostlist) > 0:
-        mylogger.info("hostlist = %s" % ''.join(hostlist)
-)
+        mylogger.info("hostlist = %s" % ''.join(hostlist))
     else:
         mylogger.error("no hostlist found, abort")
         sys.exit(2)
@@ -45,12 +44,10 @@ def action():
     command=''
     commandfile=''
     if opthash.cmd:
-	mylogger.debug("cmd = %s " % opthash.cmd
-)
+	mylogger.debug("cmd = %s " % opthash.cmd)
         command = opthash.cmd
     elif opthash.cmdf:
-        mylogger.info("cmd file = %s " % opthash.cmdf
-)
+        mylogger.info("cmd file = %s " % opthash.cmdf)
         commandfile = opthash.cmdf
    
     for host_ip in hostlist:

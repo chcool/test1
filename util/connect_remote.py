@@ -2,11 +2,12 @@ import pexpect
 import re
 import sys,os
 from exalibs import cleanline,getecrack_py
+from util.mylog import mylogger
 
 class RMT_CONN:
 
 	def __init__(self,host,verbose=0,eqptype='EXA',conmode='ssh',userid='root', password='root',timeout=10,port=22,hostname=None):
-			from exa_conf import MAX_MORE_LEN
+			from exa_conf import MAX_MORE_LEN, EXPDICT
 	
 			self.eqptype=eqptype
 			self.conmode=conmode
@@ -24,8 +25,10 @@ class RMT_CONN:
 		
 			#self.PROMPT_REGEX ='([^\r\n]+)([#|>] )$|(\r\n[\w|\W]+[#|>] )'
 			self.PROMPT_REGEX ='([^\r\n]+)([#|>] )$'
-			self.PROMPT_REGEX2 = '([\r\n|\x08+][\w|\W]+[#|>] )'
-			#self.PROMPT_REGEX2 = '\r\n([\w|\W]+[#|>] )'
+			# \0x08 is good so far - 2014.11.24 \0x08 = \b
+			#self.PROMPT_REGEX2 = '([\r\n|\x08+][\w|\W]+[#|>] )'
+			self.PROMPT_REGEX2 = '([\r\n|\b+][\w|\W]+[#|>] )'
+			#self.PROMPT_REGEX2 = '\r\n([\\w|\\W]+[#|>] )'
 			self.PROMPT_REGEX3 = '\r\n([^\r\n]+)([#|>] )$' 
 			# used for extract prompt,good for calixsupport
 			#self.PROMPT_REGEX3 = '\r\n([^\r\n]+[\w]+)([#|>] )$'
@@ -36,17 +39,32 @@ class RMT_CONN:
 	
 			self.MAX_MORE_LEN=MAX_MORE_LEN
 			
-			self.expectList1 = [re.escape("""assword:"""),
-						  re.escape("""Are you sure you want to continue connecting (yes/no)?"""),
-						  re.compile(self.PROMPT_REGEX),
-						  pexpect.TIMEOUT,
-						  re.escape("ssion denied"),
-						  re.compile('(-+More-+)'),
-						  pexpect.EOF,
-						  re.compile(self.PROMPT_REGEX2),
-						  re.escape("""Proceed with reload? [y/N]"""),
-						  re.compile('Escape character is ')]
-
+			# self.expectList1 = [re.escape("""assword:"""),
+						  # re.escape("""Are you sure you want to continue connecting (yes/no)?"""),
+						  # re.compile(self.PROMPT_REGEX),
+						  # pexpect.TIMEOUT,
+						  # re.escape("ssion denied"),
+						  # re.compile('(-+More-+)'),
+						  # pexpect.EOF,
+						  # re.compile(self.PROMPT_REGEX2),
+						  # re.escape("""Proceed with reload? [y/N]"""),
+						  # re.compile('Escape character is ')]
+						  
+			# self.expectList1 = [("assword:"),
+						  # ("""Are you sure you want to continue connecting (yes/no)?"""),
+						  # (self.PROMPT_REGEX),
+						  # pexpect.TIMEOUT,
+						  # ("ssion denied"),
+						  # ('(-+More-+)'),
+						  # pexpect.EOF,
+						  # (self.PROMPT_REGEX2),
+						  # ("""Proceed with reload? [y/N]"""),
+						  # ('Escape character is ')]
+			#EXPDICT['cliprompt2']='([\r\n|\b+][\\w|\\W]+[#|>] )'
+			self.expectList1 = EXPDICT.values()
+			self.expectKeys = EXPDICT.keys()
+			print self.expectList1
+			
 	def set_loginPrompt(self,prompt):
 		#self.PROMPT_REGEX = prompt
 		self.expectList1[2]=re.compile(prompt)
@@ -150,25 +168,29 @@ class RMT_CONN:
 		self.ssh_sess = None
 		port = 22
 		
-		expectList = self.expectList1		
+		expectList = self.expectList1	
+		expectKeys = self.expectKeys
 
 		self.ssh_sess = pexpect.spawn('ssh -p %s -l%s %s' % (port,self.userid,self.host))	
 		self.ssh_sess.maxread=4096
 		print "****** maxread = " + str(self.ssh_sess.maxread)
+		
+		
 		
 		if int(self.verbose) >= 2:
 			self.ssh_sess.logfile_read = sys.stdout
 		
 		while not exit_status:
 			i = self.ssh_sess.expect(expectList)
-			if i == 0:
+			#if i == 0:
+			if expectKeys[i] == 'password':
 				self.debug_sess(self.ssh_sess)
 				if self.userid == 'calixsupport' and (self.password == '' or self.password == 'root'):
 					pat=re.compile("Calix distro \S*\d\.\d*\.\d*\.\d*\S* (.*)\r\n.*")
 					pat=re.compile("Calix distro \S* (.*)\r\n.*")
 					m=re.search(pat,self.ssh_sess.before)
 					if m:
-						print m.groups()
+						mylogger.debug(m.groups())
 						hn = m.groups()[0].split()[0]	
 						if self.hostname != None and hn != self.hostname:
 							print "<<<<<<<< WARNING: input hostname %s is not equal to login prompt hostname %s>>>>"% (self.hostname,hn)
@@ -183,21 +205,23 @@ class RMT_CONN:
 						#	self.password=getecrack_py(hostname=self.hostname)
 						else:
 				                        self.password=getecrack_py(host_ts=m.groups()[0])
-						print "hostname=%s"%self.hostname
+						mylogger.info( "hostname=%s"%self.hostname)
 					else:
 						print "didn't find crackstr!!!"
 				#sys.exit(2)
 				else:
 					pass
 					#print "self.userid is not calixsupport, it is: "+self.userid
-				print "\r>>>>>> sent userid/password = %s/%s >>>>>>>>>>>>\r",self.userid, self.password
+				mylogger.info( "<<< v4 - sent userid/password = %s/%s >>>" %(self.userid, self.password))
 				sys.stdout.flush()
 				self.ssh_sess.send("%s\r" % self.password)				
 				continue
-			elif i == 1:
+			#elif i == 1:
+			elif expectKeys[i] == 'continue':
 				self.ssh_sess.send("yes\r")
 				continue
-			elif i == 2 or i==7:
+			#elif i == 2 or i==7:
+			elif expectKeys[i] == 'cliprompt' or expectKeys[i] == 'cliprompt2':
 			#elif i == 2 :
 				loggedIn = True;
 				exit_status = True;
@@ -205,24 +229,28 @@ class RMT_CONN:
 				self.extract_prompt(self.ssh_sess.after)
 				self.set_hostname()
 				#self.curPrompt = self.ssh_sess.after
-				print "\r>>>>>>got prompt pattern: " + self.curPrompt
-				print "\r<<<<<< hostname = " + self.hostname
+				mylogger.debug( ">> i = %s >>>>got prompt pattern: " % str(i) + self.curPrompt)
+				mylogger.debug( "<<<<<< hostname = " + self.hostname)
 				self.debug_sess(self.ssh_sess)
-			elif i == 3:
-				print self.host,"ssh got timeout"
+				
+			#elif i == 3:
+			elif expectKeys[i] == 'timeout':
+				print self.host,"ssh got timeout"				
+				self.debug_sess(self.ssh_sess)
 				exit_status = True;
-			elif i == 4:
+			#elif i == 4:
+			elif expectKeys[i] == 'logindenied':
 				print "login Denied with userid/password %s/%s!!!\r" % (self.userid,self.password)
-				
-				
 				loggedIn = False;
 				exit_status = True;
-			elif i == 6:
+			#elif i == 6:
+			elif expectKeys[i] == 'eof':
+			
 				print "\n===== ssh got pexpect.EOF, might be network issue ====\n"
 				exit_status = True;
 			else:
 				print 'unexpected event during ssh: '
-				print "got "+str(i)+","+self.session.before
+				print "got "+expectKeys[i]+","+self.session.before
 				exit_status = True;
 			
 		if loggedIn:
@@ -266,7 +294,9 @@ class RMT_CONN:
 		self.expectList1.append(matchstring)
 	
 	def sendcmd(self,cmd,sess=None):
-		expectList = self.expectList1
+		
+		expectList = self.expectList1	
+		expectKeys = self.expectKeys
 		exit_flag = False
 		sent_res = False
 		sent_ret = ""
@@ -281,8 +311,9 @@ class RMT_CONN:
 			sess.sendline(cmd)
 			while not exit_flag:
 				i = sess.expect(expectList,timeout)
-				if i == 2 or i == 7:
-					#print "<<<< exalib.sendcmd get %d, cmd= %s >>>>>\r" %(i,cmd)
+				#if i == 2 or i == 7:
+				if expectKeys[i] == 'cliprompt' or expectKeys[i] == 'cliprompt2':
+					mylogger.debug( "<<<< exalib.sendcmd i=%d, cmd= %s >>>>>" %(i,cmd))
 					#exit_flag = True
 					sent_res = True
 					sent_ret = sent_ret + sess.before
@@ -299,7 +330,8 @@ class RMT_CONN:
 						# sent_ret = sent_ret + sess.after
 						# sess.expect(expectList,timeout=1)
 						
-				elif i == 5:
+				#elif i == 5:
+				elif expectKeys[i] == 'more':
 					print "====== get more, send spacebar ==========\r"
 					sent_ret = sent_ret + sess.before
 					tt_len = str(len(sent_ret))
@@ -318,7 +350,8 @@ class RMT_CONN:
 					# sent_ret = sent_ret + sess.before
 					# self.debug_sess(sess)
 					# exit_flag = True
-				elif i == 3:
+				#elif i == 3:
+				elif expectKeys[i] == 'timeout':
 					#print " timeout,sess.after="+sess.after+"\r sess.before="+sess.before
 					#print " timeout send_ret length is: " + str(len(sent_ret))+"\n" +\
 					#	"SESS.AFTER: "+str(sess.after)+ \
@@ -333,7 +366,7 @@ class RMT_CONN:
 					else:
 						sess.send('\n')
 				else:
-					print "Return, get result = ", expectList[i]
+					print "Return, get unexpected result = ", expectKeys[i]
 					exit_flag = True
 					sent_res = True
 					sent_ret=str(expectList[i])
