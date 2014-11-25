@@ -34,7 +34,7 @@ if __name__ == "__main__":
     if opthash.act:
         mylogger.info("action string = %s" % opthash.act)
     else:
-	mylogger.info("please use -a <action string> or --act=<action string>")
+        mylogger.info("please use -a <action string> or --act=<action string>")
         sys.exit(0)
 # call the right package with parameter list
    
@@ -46,7 +46,16 @@ if __name__ == "__main__":
         try:
             mod=__import__(act_mod)
         except ImportError as e:
-           # type, value, traceback = sys.exc_info()
+            import traceback
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            print("*** print_tb:")
+            traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+            print( "*** print_exception:")
+            traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=2, file=sys.stdout)
+            print( "*** print_exc:")
+            traceback.print_exc()
+            
             mylogger.info("import %s failed"% act_mod)
             mylogger.error("Error details: %s" % str(e))
             sys.exit(2)

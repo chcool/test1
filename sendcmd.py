@@ -13,7 +13,7 @@ def sendcmd(host,cmd,cmdf,username='calixsupport',password=''):
     if conn.getSessLogin() and len(cmd) > 1:
         res,ret = conn.sendcmd(cmd)
         if res:
-	    mylogger.debug(ret)
+            mylogger.debug(ret)
     elif conn.getSessLogin() and len(cmdf) > 0:
         mylogger.info("cmd file = %s" % cmdf
 )
@@ -44,7 +44,7 @@ def action():
     command=''
     commandfile=''
     if opthash.cmd:
-	mylogger.debug("cmd = %s " % opthash.cmd)
+        mylogger.debug("cmd = %s " % opthash.cmd)
         command = opthash.cmd
     elif opthash.cmdf:
         mylogger.info("cmd file = %s " % opthash.cmdf)

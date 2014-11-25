@@ -16,13 +16,14 @@ def getjsonData(fname):
         jdata = open(fname)
         data = json.load(jdata)
     except IOError:
-        print "open %s failed" % fname
-    except (ValueError, TypeError), e:
-        print "%s is not a valid json file" % fname
+        print( ("open %s failed" % fname))
+    except (ValueError, TypeError) as e:
+        print( "%s is not a valid json file" % fname)
     return data
 
 def gethostList_fromjson(fname):
     jdata = getjsonData(fname)
+    print("gethostList_fromjson, fname="+fname)
     hosts =[]
     try:
         tmphosts=jdata['hosts']
@@ -32,9 +33,9 @@ def gethostList_fromjson(fname):
             hosts = tmphosts.values()
 
         else:
-            print "type of 'host' is not list nor dict"
+            print( "type of 'host' is not list nor dict")
     except KeyError:
-        print "no 'hosts' in -l file"
+        print( "no 'hosts' in -l file")
         return hosts
     return hosts
 
@@ -46,9 +47,9 @@ def getHostlist_fromOpt():
        for elem in opthash.hlist.split(','):
            if valid_ip(elem):
                hostlist.append(elem) 
-	   else:
+           else:
                tmplist = gethostList_fromjson(elem)
-               print tmplist 
+               print( tmplist )
                hostlist = hostlist + tmplist
     return hostlist
 

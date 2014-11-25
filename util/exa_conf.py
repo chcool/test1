@@ -17,7 +17,7 @@ hostmap['shana6']='10.2.31.156'
 import json,os
 RUN_DIR = os.getcwd()
 
-print "trying to find exa_conf.json in " + RUN_DIR
+print( "trying to find exa_conf.json in " + RUN_DIR)
 EXA_CONF=RUN_DIR+'/exa_conf.json'
 with open(EXA_CONF) as data_file:
 	data=json.load(data_file)
@@ -56,5 +56,5 @@ def set_logging(logname):
 "%(levelname)-5.5s [%(name)s %(module)s:%(funcName)s:%(lineno)d]" \
 "%(message)s") 
 	logging.info("in set_logging")
-	print "<<<<<<<<<<<< in set_logging >>>>> logname = "+logname
+	print(( "<<<<<<<<<<<< in set_logging >>>>> logname = "+logname))
 
