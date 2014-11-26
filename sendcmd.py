@@ -3,21 +3,33 @@ import re,sys
 from threading import Thread
 from optparser import getHostlist_fromOpt,parseCmd
 from util.connect_remote import RMT_CONN
+from util.exalibs import sendfile_wlog
+from util.exa_conf import get_res_fname
 from util.mylog import mylogger
+from os.path import basename
 
-def sendcmd(host,cmd,cmdf,username='calixsupport',password=''):
+def sendcmd(host,cmd,cmdf,savef,username='calixsupport',password=''):
     #get connection
     conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10,port=22)
     sess = conn.connect_ssh()
+
+    resf = "" 
+
+
     #send command
     if conn.getSessLogin() and len(cmd) > 1:
         res,ret = conn.sendcmd(cmd)
         if res:
             mylogger.debug(ret)
     elif conn.getSessLogin() and len(cmdf) > 0:
-        mylogger.info("cmd file = %s" % cmdf
-)
-        pass
+        if savef == "dflt" or savef == "":
+            resf = host + "_" + basename(cmdf)
+            mylogger.info("res file = %s" % resf)
+            resf = get_res_fname(resf)
+        mylogger.info("cmd file = %s" % cmdf)
+        mylogger.info("res file = %s" % resf)
+        sendfile_wlog(conn,cmdf,resf)
+          
     else:
         mylogger.info("%s is not reachable" % host
 )
@@ -43,15 +55,21 @@ def action():
     opthash=parseCmd()
     command=''
     commandfile=''
+    savefile=''
+
     if opthash.cmd:
         mylogger.debug("cmd = %s " % opthash.cmd)
         command = opthash.cmd
     elif opthash.cmdf:
         mylogger.info("cmd file = %s " % opthash.cmdf)
         commandfile = opthash.cmdf
+    elif opthash.save:
+        mylogger.debug("save to file argument = %s " %opthash.save)
+#        if opthash.save == "dflt":
+#            savefile = get_res_fname(
    
     for host_ip in hostlist:
-        t=Thread(target=sendcmd,args=(host_ip,command,commandfile))
+        t=Thread(target=sendcmd,args=(host_ip,command,commandfile,opthash.save))
         t.start() 
 #miao
     #sendunlock command"

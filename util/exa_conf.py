@@ -40,6 +40,8 @@ pexpect_dict = {"timeout":pTIMEOUT,"eof":pEOF}
 EXPDICT.update(pexpect_dict)
 
 import time,datetime
+ts=time.time()
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H%M%S')
 
 import logging
 
@@ -47,14 +49,19 @@ import logging
 		# "%(levelname)-5.5s [%(name)s %(module)s:%(funcName)s:%(lineno)d]" \
 		# "%(message)s") 
 
-def set_logging(logname):
-	ts=time.time()
-	st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H%M%S')
+def get_res_fname(prefix):
+    global log_base,st
+    resultfile = log_base+'/'+prefix+'_'+st+'.log'
+    return resultfile
 
-	#logfile=log_base+logname+st+'.log'
-	logging.basicConfig(filename=logname,filemode='w',level=logging.DEBUG,format="%(asctime)s " \
+
+def set_logging(logname):
+    global st
+
+#logfile=log_base+logname+st+'.log'
+    logging.basicConfig(filename=logname,filemode='w',level=logging.DEBUG,format="%(asctime)s " \
 "%(levelname)-5.5s [%(name)s %(module)s:%(funcName)s:%(lineno)d]" \
 "%(message)s") 
-	logging.info("in set_logging")
-	print(( "<<<<<<<<<<<< in set_logging >>>>> logname = "+logname))
+    logging.info("in set_logging")
+    print(( "<<<<<<<<<<<< in set_logging >>>>> logname = "+logname))
 

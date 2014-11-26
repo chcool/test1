@@ -59,13 +59,16 @@ def parseHostlist():
     args,unknown = parser.parse_known_args()
     return args
 
+#called by sendcmd.py
 def parseCmd():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m","--cmd",help="command to be sent")
     parser.add_argument("-f","--cmdf",help="command file to be sent")
+    parser.add_argument("-s","--save",help="wether result of send command should be saved to file, dflt means default")
     args,unknown = parser.parse_known_args()
     return args
 
+#2014.11.25 - not called 
 def parseCfg():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c","--cfg",help="json config file,not implemented ")

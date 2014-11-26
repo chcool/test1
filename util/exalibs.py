@@ -118,7 +118,10 @@ def processCmd(conn,cmd):
     return res,cmd
                 
 def sendfile_wlog(conn,cmdfile,logname):
-    f=open(logname,'a')
+    if logname != "":
+        f=open(logname,'a')
+    else:
+        f=None
     
     if conn.getSessLogin():
 
@@ -132,17 +135,20 @@ def sendfile_wlog(conn,cmdfile,logname):
             if res == 0:
                 print( ">>>>>> about to send cmd %s <<<<<<\n"%cmd)
                 res,ret=conn.sendcmd(cmd)
-                f.write("\n==========\n%s==========\n"%cmd)
-                if res:            
+                if f:
+                    f.write("\n==========\n%s==========\n"%cmd)
+                if res and f:            
                     f.write(cleanline(ret))    
                     f.write("\n")
-                    print( "<<<<<<<< ret = %s  >>>>>\n"%ret)
+                    #print( "<<<<<<<< ret = %s  >>>>>\n"%ret)
                 if ret.find('command not found') >=0:
                     print( "*** break!!! ****, got wrong prompt, correct " + cmdfile)
                     break;
     else:
-        f.write("\n=== %s Login failed ===\n"%host1)
-    f.close()
+        if f:
+            f.write("\n=== %s Login failed ===\n"%host1)
+    if f:
+        f.close()
 
         
         
