@@ -313,7 +313,7 @@ class RMT_CONN:
                 i = sess.expect(expectList,timeout)
                 #if i == 2 or i == 7:
                 if expectKeys[i] == 'cliprompt' or expectKeys[i] == 'cliprompt2':
-                    mylogger.debug( "<<<< exalib.sendcmd i=%d, cmd= %s >>>>>" %(i,cmd))
+                    mylogger.debug( "<<<< getprompt:%s, retry = %d, cmd= %s >>>>>" %(expectKeys[i],retry,cmd))
                     #exit_flag = True
                     sent_res = True
                     sent_ret = sent_ret + (sess.before).decode("utf-8")
@@ -321,7 +321,7 @@ class RMT_CONN:
                     self.curPrompt = sess.after
                     
                     #2014.09.05 - temp test hoch
-                    retry = max_retry + 1
+                    retry = retry + 1
                     sent_ret = sent_ret + (sess.after).decode("utf-8")
                     timeout=1
                     continue
