@@ -137,6 +137,11 @@ def sendfile_wlog(conn,cmdfile,logname):
                 res,ret=conn.sendcmd(cmd)
                 if f:
                     f.write("\n==========\n%s==========\n"%cmd)
+                else:
+# print to stdout
+                    print(ret)
+                    continue 
+
                 if res and f:            
                     f.write(cleanline(ret))    
                     f.write("\n")

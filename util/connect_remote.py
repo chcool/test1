@@ -321,9 +321,13 @@ class RMT_CONN:
                     self.curPrompt = sess.after
                     
                     #2014.09.05 - temp test hoch
+					
                     retry = retry + 1
                     sent_ret = sent_ret + (sess.after).decode("utf-8")
                     timeout=1
+                    #2014.12.03 - figure out why need to always return twice here, in linux prompt, sometimes need to do more expect 
+					#otherwise the result want to captured.so always let timeout to exit the loop
+                    #exit_flag = Tru
                     continue
                     # if i==7:
                         # print( "******* get 7, clear out sess.after *****")
@@ -352,7 +356,7 @@ class RMT_CONN:
                     # exit_flag = True
                 #elif i == 3:
                 elif expectKeys[i] == 'timeout':
-                    #print " timeout,sess.after="+sess.after+"\r sess.before="+sess.before
+                    #print (" timeout,retry = %d " % retry)
                     #print " timeout send_ret length is: " + str(len(sent_ret))+"\n" +\
                     #    "SESS.AFTER: "+str(sess.after)+ \
                     #    ";\n SESS.BEFORE: \n"+\

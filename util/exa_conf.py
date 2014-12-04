@@ -24,6 +24,7 @@ with open(EXA_CONF) as data_file:
 
 cmdfile_base=data["cmdfile_base"]
 log_base=data["log_base"]
+log_level=int(data["log_level"])
 
 MAX_WAIT=int(data["MAX_WAIT"])
 SLEEP_DL=int(data["SLEEP_DL"])
@@ -59,7 +60,7 @@ def set_logging(logname):
     global st
 
 #logfile=log_base+logname+st+'.log'
-    logging.basicConfig(filename=logname,filemode='w',level=logging.DEBUG,format="%(asctime)s " \
+    logging.basicConfig(filename=logname,filemode='w',level=logging.INFO,format="%(asctime)s " \
 "%(levelname)-5.5s [%(name)s %(module)s:%(funcName)s:%(lineno)d]" \
 "%(message)s") 
     logging.info("in set_logging")

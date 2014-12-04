@@ -1,5 +1,6 @@
 {"cmdfile_base":"cmd/",
 "log_base":"/tmp/log/",
+"log_level":"25",
 "MAX_WAIT":"100",
 "SLEEP_DL":"15",
 "SLEEP_RB":"50",
