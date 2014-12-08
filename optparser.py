@@ -1,9 +1,9 @@
-from __future__ import unicode_literals
+#from __future__ import unicode_literals
 import argparse
 from socket import inet_aton
 import json
 from util.mylog import mylogger
-
+from sys import version_info
 
 def valid_ip(str):
     try:
@@ -39,9 +39,11 @@ def gethostList_fromjson(fname):
             #print(len(hosts))
         elif type(tmphosts) is dict:
             hosts = tmphosts.values()
-
-        elif type(tmphosts) is unicode:
+        if version_info.major == 2 and type(tmphosts) is unicode \
+        or version_info.major == 3 and type(tmphosts) is str:
+        #elif type(tmphosts) is unicode:
             hosts = tmphosts.split(',')
+        
         else:
             mylogger.error( "type of 'host' is %s, not list nor dict" % type(tmphosts))
     except KeyError:
