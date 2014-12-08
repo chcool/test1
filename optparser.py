@@ -1,7 +1,9 @@
+from __future__ import unicode_literals
 import argparse
 from socket import inet_aton
 import json
 from util.mylog import mylogger
+
 
 def valid_ip(str):
     try:
