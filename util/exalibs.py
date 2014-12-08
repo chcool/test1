@@ -66,7 +66,7 @@ def cleanline(line):
     pat=re.compile(r'\x1b\x5b\x37\x6d|\x1b\x5b\x32\x37\x6d|\x08|\x1b\x5b\x3f\x37\x68')
     m=re.search(pat,line)
     if m:    
-        print( "<<< cleanline = %s " % l)
+        #print( "<<< cleanline = %s " % l)
         l=re.sub(pat,'',line)
     return l
     

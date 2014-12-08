@@ -12,6 +12,7 @@ def sendcmd(host,cmd,cmdf,savef,username='calixsupport',password=''):
     #get connection
     conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10,port=22)
     sess = conn.connect_ssh()
+    hostname=conn.get_hostname()
 
     resf = "" 
 
@@ -20,7 +21,8 @@ def sendcmd(host,cmd,cmdf,savef,username='calixsupport',password=''):
     if conn.getSessLogin() and len(cmd) > 1:
         res,ret = conn.sendcmd(cmd)
         if res:
-            mylogger.debug(ret)
+            mylogger.info("===== %s(%s) =======" % (host,hostname))
+            mylogger.info(ret)
     elif conn.getSessLogin() and len(cmdf) > 0:
         if savef == "dflt" or savef == "":
             resf = host + "_" + basename(cmdf)
@@ -39,14 +41,14 @@ def sendcmd(host,cmd,cmdf,savef,username='calixsupport',password=''):
        
 
 def action():
-    mylogger.info( "###### in sendcmd v2 ########")
+    mylogger.debug( "###### in sendcmd v2 ########")
 
 #    opthash=parseHostlist()
 #    if opthash.hlist:
 
     hostlist = getHostlist_fromOpt()
     if len(hostlist) > 0:
-        mylogger.info("hostlist = %s" % ''.join(hostlist))
+        mylogger.info("hostlist = %s" % ','.join(hostlist))
     else:
         mylogger.error("no hostlist found, abort")
         sys.exit(2)
@@ -58,6 +60,7 @@ def action():
     savefile=''
 
     if opthash.cmd:
+        #mylogger.log(7,"cmd = %s " % opthash.cmd)
         mylogger.debug("cmd = %s " % opthash.cmd)
         command = opthash.cmd
     elif opthash.cmdf:

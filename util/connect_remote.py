@@ -63,7 +63,7 @@ class RMT_CONN:
             #EXPDICT['cliprompt2']='([\r\n|\b+][\\w|\\W]+[#|>] )'
             self.expectList1 = list(EXPDICT.values())
             self.expectKeys = list(EXPDICT.keys())
-            print( self.expectList1)
+            #print( self.expectList1)
             
     def set_loginPrompt(self,prompt):
         #self.PROMPT_REGEX = prompt
@@ -93,7 +93,7 @@ class RMT_CONN:
             ex = re.compile(self.PROMPT_REGEX3)
             m = re.search(ex,after)
             if m:
-                print( "prompt = " + m.groups()[0])
+                mylogger.debug( "prompt = " + m.groups()[0])
                 self.curPrompt = m.groups()[0]                
             else:
                 print( "######## START #################")
@@ -155,7 +155,7 @@ class RMT_CONN:
                 
             if loggedIn:
                 #self.ssh_sess.interact()
-                print( "successfully logged in\n, pexpect.before:\r",self.session.before,"\r-------------\r")
+                mylogger.debug( "successfully logged in\n, pexpect.before:\r",self.session.before,"\r-------------\r")
             else:
                 print( "loggedIn is not True\r")
             
@@ -173,7 +173,7 @@ class RMT_CONN:
 
         self.ssh_sess = pexpect.spawn('ssh -p %s -l%s %s' % (port,self.userid,self.host))    
         self.ssh_sess.maxread=4096
-        print( "****** maxread = " + str(self.ssh_sess.maxread))
+        #print( "****** maxread = " + str(self.ssh_sess.maxread))
         
         
         
@@ -205,7 +205,7 @@ class RMT_CONN:
                         #    self.password=getecrack_py(hostname=self.hostname)
                         else:
                                         self.password=getecrack_py(host_ts=m.groups()[0])
-                        mylogger.info( "hostname=%s"%self.hostname)
+                        mylogger.debug( "hostname=%s"%self.hostname)
                     else:
                         print( "didn't find crackstr!!!")
                 #sys.exit(2)
@@ -255,7 +255,7 @@ class RMT_CONN:
             
         if loggedIn:
             #self.ssh_sess.interact()
-            print( "successfully logged in\n, pexpect.before:\r",self.ssh_sess.before,"\r********************\r")
+            mylogger.debug( "successfully logged in\n, pexpect.before:\r",self.ssh_sess.before,"\r********************\r")
         else:
             print( "loggedIn is not True\r")
         
@@ -336,7 +336,7 @@ class RMT_CONN:
                         
                 #elif i == 5:
                 elif expectKeys[i] == 'more':
-                    print( "====== get more, send spacebar ==========\r")
+                    mylogger.debug( "====== get more, send spacebar ==========\r")
                     sent_ret = sent_ret + sess.before
                     tt_len = str(len(sent_ret))
                     #print "~~~~ send_ret length is : " + tt_len +"\n"

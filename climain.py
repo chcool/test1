@@ -40,7 +40,7 @@ if __name__ == "__main__":
    
 
     act_mod,act_func=parseActionStr(opthash.act)
-    mylogger.info(act_func)
+    mylogger.debug("module=%s, action=%s"%(act_mod,act_func))
 
     if len(act_mod) > 0:
         try:

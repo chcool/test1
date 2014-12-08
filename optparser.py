@@ -16,24 +16,32 @@ def getjsonData(fname):
         jdata = open(fname)
         data = json.load(jdata)
     except IOError:
-        print( ("open %s failed" % fname))
+        mylogger.error( ("open %s failed" % fname))
     except (ValueError, TypeError) as e:
-        print( "%s is not a valid json file" % fname)
+        mylogger.error( "%s is not a valid json file !!!" % fname)
     return data
 
 def gethostList_fromjson(fname):
+    
+    mylogger.info("gethostList_fromjson, fname="+fname)
     jdata = getjsonData(fname)
-    print("gethostList_fromjson, fname="+fname)
+    if not jdata:
+        mylogger.error("jdata is empty, return None")
+        return None
     hosts =[]
     try:
         tmphosts=jdata['hosts']
         if type(tmphosts) is list:
             hosts = tmphosts
+            #mylogger.log(15,':'.join(hosts))
+            #print(len(hosts))
         elif type(tmphosts) is dict:
             hosts = tmphosts.values()
 
+        elif type(tmphosts) is unicode:
+            hosts = tmphosts.split(',')
         else:
-            print( "type of 'host' is not list nor dict")
+            mylogger.error( "type of 'host' is %s, not list nor dict" % type(tmphosts))
     except KeyError:
         print( "no 'hosts' in -l file")
         return hosts
@@ -42,15 +50,18 @@ def gethostList_fromjson(fname):
 def getHostlist_fromOpt():
     opthash = parseHostlist()
     hostlist=[]
-
+    mylogger.info(opthash)
     if opthash.hlist:
+       
        for elem in opthash.hlist.split(','):
+           #mylogger.info(elem)
            if valid_ip(elem):
                hostlist.append(elem) 
            else:
                tmplist = gethostList_fromjson(elem)
-               print( tmplist )
-               hostlist = hostlist + tmplist
+               if tmplist:
+                    mylogger.debug( tmplist )
+                    hostlist = hostlist + tmplist
     return hostlist
 
 def parseHostlist():
