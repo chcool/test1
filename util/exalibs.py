@@ -127,9 +127,7 @@ def sendcmdlist_wlog(conn,cmdlist,logname):
         f=None
     
     if conn.getSessLogin():
-        #f1=open(cmdfile,'r')
-        #cmds =f1.readlines()
-        #f1.close()
+ 
         
         for cmd in cmdlist:
             res,cmd=processCmd(conn,cmd)
@@ -167,37 +165,6 @@ def sendfile_wlog(conn,cmdfile,logname):
     f1.close()
     sendcmdlist_wlog(conn,cmds,logname)
     
-    # if conn.getSessLogin():
-
-        # f1=open(cmdfile,'r')
-        # cmds =f1.readlines()
-        # f1.close()
-        
-        # for cmd in cmds:
-            # res,cmd=processCmd(conn,cmd)
-            
-            # if res == 0:
-                # print( ">>>>>> about to send cmd %s <<<<<<\n"%cmd)
-                # res,ret=conn.sendcmd(cmd)
-                # if f:
-                    # f.write("\n==========\n%s==========\n"%cmd)
-                # else:
-# # print to stdout
-                    # print(ret)
-                    # continue 
-
-                # if res and f:            
-                    # f.write(cleanline(ret))    
-                    # f.write("\n")
-                    # #print( "<<<<<<<< ret = %s  >>>>>\n"%ret)
-                # if ret.find('command not found') >=0:
-                    # print( "*** break!!! ****, got wrong prompt, correct " + cmdfile)
-                    # break;
-    # else:
-        # if f:
-            # f.write("\n=== %s Login failed ===\n"%host1)
-    # if f:
-        # f.close()
 
         
         
@@ -271,17 +238,17 @@ def unlock_root(conn):
     res,ret=conn.sendcmd("passwd -u root")
     return res,ret
     
-def getecrack_pl(hostname,timestr):
-    cmd="perl /home/hochen/prog/perl/ecrack.pl "+hostname+' '+timestr
-    print( "in getecrack_pl, cmd = "+cmd)
-    str1=os.popen(cmd).read()
-    pat='The password for the default and debug users are: (.*)\n'
-    m=re.search(pat,str1)
-    pw=''
-    if m:
-        pw=m.groups()[0]
-    print( "in getecrack_pl, pw = " + pw)
-    return pw
+# def getecrack_pl(hostname,timestr):
+    # cmd="perl /home/hochen/prog/perl/ecrack.pl "+hostname+' '+timestr
+    # print( "in getecrack_pl, cmd = "+cmd)
+    # str1=os.popen(cmd).read()
+    # pat='The password for the default and debug users are: (.*)\n'
+    # m=re.search(pat,str1)
+    # pw=''
+    # if m:
+        # pw=m.groups()[0]
+    # print( "in getecrack_pl, pw = " + pw)
+    # return pw
 
 def getecrack_ts():
     ts=time.time()
