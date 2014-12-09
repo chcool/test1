@@ -4,10 +4,10 @@ if [ $# -lt 1 ]; then
 fi
 
 if [ $# -eq 3 ]; then
-   echo "has \$2"
+   echo "has \$3"
    if [ $3 -eq 3 ]; then
-        echo "use python$2"
-        PYTHON="python$2"
+        echo "use python$3"
+        PYTHON="python$3"
    else
        echo "\$2 is not 3, still use python2"
    fi
