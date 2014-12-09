@@ -3,7 +3,7 @@ import re,sys
 from threading import Thread
 from optparser import getHostlist_fromOpt,parseCmd
 from util.connect_remote import RMT_CONN
-from util.exalibs import sendfile_wlog
+from util.exalibs import sendfile_wlog,sendcmdlist_wlog
 from util.exa_conf import get_res_fname
 from util.mylog import mylogger
 from os.path import basename
@@ -15,25 +15,33 @@ def sendcmd(host,cmd,cmdf,savef,username='calixsupport',password=''):
     hostname=conn.get_hostname()
 
     resf = "" 
-
+    
 
     #send command
-    if conn.getSessLogin() and len(cmd) > 1:
-        res,ret = conn.sendcmd(cmd)
-        if res:
-            mylogger.info("===== %s(%s) =======" % (host,hostname))
-            mylogger.info(ret)
-    elif conn.getSessLogin() and len(cmdf) > 0:
+    if conn.getSessLogin():
         if savef == "dflt" or savef == "":
-            resf = host + "_" + basename(cmdf)
+            if len(cmdf)>1:
+                resf = host + "_" + basename(cmdf)
+            else:
+                rest = host
             mylogger.info("res file = %s" % resf)
             resf = get_res_fname(resf)
-        mylogger.info("cmd file = %s" % cmdf)
-        mylogger.info("res file = %s" % resf)
-        sendfile_wlog(conn,cmdf,resf)
+            
+        if len(cmd.split(',')) > 1:
+            sendcmdlist_wlog(conn,cmd.split(','),resf)
+        elif len(cmd) > 1:
+            res,ret = conn.sendcmd(cmd)
+            if res:
+                mylogger.info("===== %s(%s) =======" % (host,hostname))
+                mylogger.info(ret)
+        if len(cmdf) > 0:
+            
+            mylogger.info("cmd file = %s" % cmdf)
+            mylogger.info("res file = %s" % resf)
+            sendfile_wlog(conn,cmdf,resf)
           
     else:
-        mylogger.info("%s is not reachable" % host
+        mylogger.error("%s is not reachable" % host
 )
         return None
 

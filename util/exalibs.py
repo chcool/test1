@@ -9,6 +9,8 @@ import os
 from util.ecrack import ecrack
 from socket import inet_aton
 
+from util.mylog import mylogger
+
 def keyboard_exit():
     try:
         sys.stdin.read()
@@ -116,29 +118,29 @@ def processCmd(conn,cmd):
                 time.sleep(int(wait))
         
     return res,cmd
-                
-def sendfile_wlog(conn,cmdfile,logname):
+
+
+def sendcmdlist_wlog(conn,cmdlist,logname):
     if logname != "":
         f=open(logname,'a')
     else:
         f=None
     
     if conn.getSessLogin():
-
-        f1=open(cmdfile,'r')
-        cmds =f1.readlines()
-        f1.close()
+        #f1=open(cmdfile,'r')
+        #cmds =f1.readlines()
+        #f1.close()
         
-        for cmd in cmds:
+        for cmd in cmdlist:
             res,cmd=processCmd(conn,cmd)
             
             if res == 0:
-                print( ">>>>>> about to send cmd %s <<<<<<\n"%cmd)
+                mylogger.debug( ">>>>>> about to send cmd %s <<<<<<\n"%cmd)
                 res,ret=conn.sendcmd(cmd)
                 if f:
                     f.write("\n==========\n%s==========\n"%cmd)
                 else:
-# print to stdout
+                # print to stdout
                     print(ret)
                     continue 
 
@@ -147,13 +149,55 @@ def sendfile_wlog(conn,cmdfile,logname):
                     f.write("\n")
                     #print( "<<<<<<<< ret = %s  >>>>>\n"%ret)
                 if ret.find('command not found') >=0:
-                    print( "*** break!!! ****, got wrong prompt, correct " + cmdfile)
+                    mylogger.error( "*** break!!! ****, got wrong prompt, correct " + cmdfile)
                     break;
     else:
         if f:
             f.write("\n=== %s Login failed ===\n"%host1)
     if f:
         f.close()
+def sendfile_wlog(conn,cmdfile,logname):
+    # if logname != "":
+        # f=open(logname,'a')
+    # else:
+        # f=None
+    
+    f1=open(cmdfile,'r')
+    cmds =f1.readlines()
+    f1.close()
+    sendcmdlist_wlog(conn,cmds,logname)
+    
+    # if conn.getSessLogin():
+
+        # f1=open(cmdfile,'r')
+        # cmds =f1.readlines()
+        # f1.close()
+        
+        # for cmd in cmds:
+            # res,cmd=processCmd(conn,cmd)
+            
+            # if res == 0:
+                # print( ">>>>>> about to send cmd %s <<<<<<\n"%cmd)
+                # res,ret=conn.sendcmd(cmd)
+                # if f:
+                    # f.write("\n==========\n%s==========\n"%cmd)
+                # else:
+# # print to stdout
+                    # print(ret)
+                    # continue 
+
+                # if res and f:            
+                    # f.write(cleanline(ret))    
+                    # f.write("\n")
+                    # #print( "<<<<<<<< ret = %s  >>>>>\n"%ret)
+                # if ret.find('command not found') >=0:
+                    # print( "*** break!!! ****, got wrong prompt, correct " + cmdfile)
+                    # break;
+    # else:
+        # if f:
+            # f.write("\n=== %s Login failed ===\n"%host1)
+    # if f:
+        # f.close()
 
         
         
