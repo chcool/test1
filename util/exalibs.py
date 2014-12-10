@@ -100,12 +100,18 @@ def processCmd(conn,cmd):
     cmd1 = cmd.strip().lower()
     commentpat=re.compile('^ *#(.*)')
     m=re.search(commentpat,cmd1)
+    # if it has #,it is a comment line, set res=1 to not sending it.
     if m:
         res = 1
+        return res,cmd
+    
+    # a line without @, a normal command
     if cmd1.find('@') <0:
         return res,cmd
     else:        
         res = 1
+        cmd=''
+        # see cmd/HOCH2-ntp-snmp.cmd for usage
         if cmd1.find('@exp') >=0:
             explist=cmd.split('\'')
             if len(explist) >=2:
@@ -116,11 +122,20 @@ def processCmd(conn,cmd):
             if len(explist) >=2:
                 wait=explist[1]
                 time.sleep(int(wait))
+        elif cmd1.find('@reload') >=0:
+            # note, can't name the function reload, seems it is a reserved name.
+            conn.restart()
+            
+        elif cmd1.find('@reconnect') >=0:
+            conn.reconnect()
+            
         
     return res,cmd
 
 
 def sendcmdlist_wlog(conn,cmdlist,logname):
+    res = 0,
+    ret = ''
     if logname != "":
         f=open(logname,'a')
     else:
@@ -131,7 +146,8 @@ def sendcmdlist_wlog(conn,cmdlist,logname):
         
         for cmd in cmdlist:
             res,cmd=processCmd(conn,cmd)
-            
+            mylogger.debug("res=%d, cmd=%s" % (res,cmd))
+           
             if res == 0:
                 mylogger.debug( ">>>>>> about to send cmd %s <<<<<<\n"%cmd)
                 res,ret=conn.sendcmd(cmd)
@@ -154,6 +170,8 @@ def sendcmdlist_wlog(conn,cmdlist,logname):
             f.write("\n=== %s Login failed ===\n"%host1)
     if f:
         f.close()
+    return res,ret
+        
 def sendfile_wlog(conn,cmdfile,logname):
     # if logname != "":
         # f=open(logname,'a')

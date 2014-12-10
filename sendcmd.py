@@ -30,7 +30,8 @@ def sendcmd(host,cmd,cmdf,savef,username='calixsupport',password=''):
         if len(cmd.split(',')) > 1:
             sendcmdlist_wlog(conn,cmd.split(','),resf)
         elif len(cmd) > 1:
-            res,ret = conn.sendcmd(cmd)
+            #res,ret = conn.sendcmd(cmd)
+            res,ret=sendcmdlist_wlog(conn,[cmd],'')
             if res:
                 mylogger.info("===== %s(%s) =======" % (host,hostname))
                 mylogger.info(ret)

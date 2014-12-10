@@ -1,6 +1,6 @@
 {"cmdfile_base":"cmd/",
 "log_base":"/tmp/log/",
-"log_level":"15",
+"log_level":"10",
 "MAX_WAIT":"100",
 "SLEEP_DL":"15",
 "SLEEP_RB":"50",
@@ -9,7 +9,7 @@
 "cliprompt":"'([^\r\n]+)([#|>] )$'",
 "cliprompt2":"([\r\n|\b+][\\w|\\W]+[#|>] )",
 "more":"(-+More-+)",
-"reloadprompt":"Proceed with reload? [y/N]",
+"reloadprompt":"Proceed with reload\\?",
 "password":"assword:", 
 "continue":"Are you sure you want to continue connecting (yes/no)?",
 "logindenied":"ssion denied" }
