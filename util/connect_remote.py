@@ -237,7 +237,7 @@ class RMT_CONN:
             
         if loggedIn:
             #self.ssh_sess.interact()
-            mylogger.debug( "successfully logged in\n, pexpect.before:\r"+self.ssh_sess.before+"\r********************\r")
+            mylogger.debug( "successfully logged in\n, pexpect.before:\r"+str(self.ssh_sess.before)+"\r********************\r")
         else:
             print( "loggedIn is not True\r")
         
