@@ -387,7 +387,7 @@ class RMT_CONN:
     
     
     def restart(self):
-        mylogger.warning("about to reload the node")
+        mylogger.warning("about to reload the node !!!")
         self.reload = 1
         if self.loggedIn:
             self.sendcmd('reload')
