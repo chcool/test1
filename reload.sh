@@ -14,4 +14,4 @@ else
    echo "use python2"
 fi
 # change the -a and other options
-eval "$PYTHON climain.py -a sendcmd.action -m \"show ver,@reload,@reconnect,show ver\" -l \"$1\""
+eval "$PYTHON climain.py -a sendcmd.action -m \"show ver,@reload,@reconnect,shell,passwd -u root,exit,show ver\" -l \"$1\""
