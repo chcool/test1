@@ -295,8 +295,16 @@ class RMT_CONN:
         if sess is None:
             sess = self.ssh_sess
             
-        if sess and self.loggedIn and len(cmd)>=1:            
-            sess.sendline(cmd)
+        if sess and self.loggedIn and len(cmd)>=1:      
+            if cmd.find('ctrl-') >= 0:
+                cmdlist=cmd.strip().split('-')
+                if len(cmdlist) > 1:
+                    sess.sendcontrol(cmdlist[1])    
+                else:
+                    mylogger.error("%s is not a valid command,exit sendcmd" % cmd)
+                    exit_flag = True
+            else:      
+                sess.sendline(cmd)
             while not exit_flag:
                 i = sess.expect(expectList,timeout)
                 #if i == 2 or i == 7:
@@ -321,6 +329,11 @@ class RMT_CONN:
                    
                         
                 #elif i == 5:
+                elif expectKeys[i].find('tmpkey') >= 0:
+                    mylogger.bebug(" ==== get tmpkey:%s ======"% (expectKeys[i])) 
+                    exit_flag = True
+                    send_res = True
+                    sent_ret = sent_ret + (sess.before).decode("utf-8") + (sess.after).decode("utf-8")
                 elif expectKeys[i] == 'more':
                     mylogger.debug( "====== get more, send spacebar ==========\r")
                     sent_ret = sent_ret + sess.before
