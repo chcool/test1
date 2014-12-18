@@ -55,7 +55,7 @@ class RMT_CONN:
         if int(self.verbose) >= 0:
             mylogger.debug( "======debug-start================")
             mylogger.debug("sess.maxread = %d" % sess.maxread)
-            mylogger.debug("sess.match =  " + sess.match.group(0))
+            mylogger.debug("sess.match =  " + str(sess.match.group(0)))
             mylogger.debug( "=== sess.before:"+str([sess.before]))
             mylogger.debug( "=== sess.after:"+str([sess.after]))
             mylogger.debug( "======debug-end===================")
