@@ -43,6 +43,7 @@ class RMT_CONN:
             
             self.expectList1 = list(EXPDICT.values())
             self.expectKeys = list(EXPDICT.keys())
+            self.expectActions = {}
             
             self.reload = 0
             
@@ -53,6 +54,8 @@ class RMT_CONN:
     def debug_sess(self,sess):
         if int(self.verbose) >= 0:
             mylogger.debug( "======debug-start================")
+            mylogger.debug("sess.maxread = %d" % sess.maxread)
+            mylogger.debug("sess.match =  " + sess.match.group(0))
             mylogger.debug( "=== sess.before:"+str([sess.before]))
             mylogger.debug( "=== sess.after:"+str([sess.after]))
             mylogger.debug( "======debug-end===================")
@@ -153,8 +156,8 @@ class RMT_CONN:
         expectList = self.expectList1    
         expectKeys = self.expectKeys
 
-        self.ssh_sess = pexpect.spawn('ssh -p %s -l%s %s' % (port,self.userid,self.host))    
-        self.ssh_sess.maxread=4096
+        self.ssh_sess = pexpect.spawn('ssh -p %s -l%s %s' % (port,self.userid,self.host),maxread=4096)    
+        #self.ssh_sess.maxread=5120
         #print( "****** maxread = " + str(self.ssh_sess.maxread))
         
         
@@ -275,11 +278,36 @@ class RMT_CONN:
     # usd with @exp, to handle unexpected prompt
     # see cmd/HOCH2-ntp-snmp.cmd
     def addMatch(self,matchstring):
-        self.expectList1.append(matchstring)
-        keyidx = len(self.expectList1)
-        self.expectKeys.append("tmpkey"+str(keyidx))
+        mylogger.debug("~~~~~~ add match pattern %s ~~~~~~~~" % matchstring)
+        params=matchstring.split('|')
+        
+        
+        if len(params) >= 1:
+            self.expectList1.append(params[0].decode("utf-8"))
+            keyidx = len(self.expectList1)
+            self.expectKeys.append("tmpkey"+str(keyidx))
+            if len(params) >=2:
+                
+                self.expectActions['tmpkey'+str(keyidx)]=params[1]
+        
     # need to add more logic later to sendcmd. 2014.12.8
     
+    def sendaction(self,action,sess):
+        res = True
+        if action.find('ctrl-') >= 0:
+                cmdlist=action.strip().split('-')
+                if len(cmdlist) > 1:
+                    #sess.sendcontrol(cmdlist[1])    
+                    sess.send('\x03')
+                else:
+                    mylogger.error("%s is not a valid command,exit sendcmd" % cmd)
+                    res = False
+        elif action.find('<return>'):
+            sess.sendline()
+        else:
+            sess.sendline(action)
+        return res
+        
     def sendcmd(self,cmd,sess=None):
         
         expectList = self.expectList1    
@@ -290,7 +318,10 @@ class RMT_CONN:
         max_retry = 2
         retry = 0
         timeout=self.timeout
+        
         mylogger.debug(expectList)
+        mylogger.debug(expectKeys)
+        mylogger.debug(str(self.expectActions))
         
         if sess is None:
             sess = self.ssh_sess
@@ -307,8 +338,23 @@ class RMT_CONN:
                 sess.sendline(cmd)
             while not exit_flag:
                 i = sess.expect(expectList,timeout)
-                #if i == 2 or i == 7:
-                if expectKeys[i] == 'cliprompt' or expectKeys[i] == 'cliprompt2':
+                
+                if expectKeys[i].find('tmpkey') >= 0:
+                    mylogger.debug(" ~~~~~ get tmpkey:%s ~~~~~~~"% (expectKeys[i])) 
+                    try:
+                        action = self.expectActions[expectKeys[i]]
+                        exit_flag = not self.sendaction(action,sess)
+                        
+                    except (NameError, KeyError) as e:
+                        mylogger.debug("no action for %s" % (expectKeys[i])) 
+                        mylogger.debug(str(e))
+                        exit_flag = True
+                    send_res = True
+                    sent_ret = sent_ret + (sess.before).decode("utf-8") + (sess.after).decode("utf-8")
+                    self.debug_sess(sess)
+                    continue
+                
+                elif expectKeys[i] == 'cliprompt' or expectKeys[i] == 'cliprompt2':
                     mylogger.debug( "<<<< getprompt:%s, retry = %d, cmd= %s >>>>>" %(expectKeys[i],retry,cmd))
                     #exit_flag = True
                     sent_res = True
@@ -329,11 +375,7 @@ class RMT_CONN:
                    
                         
                 #elif i == 5:
-                elif expectKeys[i].find('tmpkey') >= 0:
-                    mylogger.bebug(" ==== get tmpkey:%s ======"% (expectKeys[i])) 
-                    exit_flag = True
-                    send_res = True
-                    sent_ret = sent_ret + (sess.before).decode("utf-8") + (sess.after).decode("utf-8")
+                
                 elif expectKeys[i] == 'more':
                     mylogger.debug( "====== get more, send spacebar ==========\r")
                     sent_ret = sent_ret + sess.before

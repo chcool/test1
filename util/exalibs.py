@@ -97,7 +97,7 @@ def sendfile(conn,cmdfile):
 
 def processCmd(conn,cmd):
     res = 0
-    cmd1 = cmd.strip().lower()
+    cmd1 = cmd.strip()
     commentpat=re.compile('^ *#(.*)')
     m=re.search(commentpat,cmd1)
     # if it has #,it is a comment line, set res=1 to not sending it.
@@ -112,17 +112,26 @@ def processCmd(conn,cmd):
         res = 1
         cmd=''
         # see cmd/HOCH2-ntp-snmp.cmd for usage
-        if cmd1.find('@exp') >=0:
+        if cmd1.lower().find('@exp') >=0:
+            cmdparam=cmd1.split('@exp')
+            if len(cmdparam) >=2:
+                conn.addMatch(cmdparam[1].strip())
+                res = 0
+                return res,cmdparam[0].strip()
+            else:
+                mylogger.error("cmd [%s] @exp input is wrong" % cmd1)
+                mylogger.error(cmdparam)
+                return res,''
             explist=cmd.split('\'')
             if len(explist) >=2:
                 param = explist[1]
                 conn.addMatch(param)
-        elif cmd1.find('@wait') >=0:
+        elif cmd1.lower().find('@wait') >=0:
             explist=cmd.split()
             if len(explist) >=2:
                 wait=explist[1]
                 time.sleep(int(wait))
-        elif cmd1.find('@reload') >=0:
+        elif cmd1.lower().find('@reload') >=0:
             # note, can't name the function reload, seems it is a reserved name.
             conn.restart()
             
