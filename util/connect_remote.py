@@ -378,7 +378,7 @@ class RMT_CONN:
                 
                 elif expectKeys[i] == 'more':
                     mylogger.debug( "====== get more, send spacebar ==========\r")
-                    sent_ret = sent_ret + sess.before
+                    sent_ret = sent_ret + (sess.before).decode("utf-8")
                     tt_len = str(len(sent_ret))
                     #print "~~~~ send_ret length is : " + tt_len +"\n"
                     if int(tt_len) > int(self.MAX_MORE_LEN):
