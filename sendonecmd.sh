@@ -3,6 +3,7 @@ if [ $# -lt 1 ]; then
    echo "run it like $0 <hostlist> <cmd(s)> [python version number]"
 fi
 
+
 last=$#
 echo "python$last"
 #exit
