@@ -14,5 +14,4 @@ if [ $last -eq 3 ]; then
 else
    echo "use python2"
 fi
-
 eval "$PYTHON climain.py -a sendcmd.action -m \"$2\" -l \"$1\""
