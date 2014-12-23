@@ -53,13 +53,15 @@ class RMT_CONN:
 
     def debug_sess(self,sess):
         if int(self.verbose) >= 0:
-            mylogger.debug( "======debug-start================")
-            mylogger.debug("sess.maxread = %d" % sess.maxread)
-            mylogger.debug("sess.match =  " + str(sess.match.group(0)))
-            mylogger.debug( "=== sess.before:"+str([sess.before]))
-            mylogger.debug( "=== sess.after:"+str([sess.after]))
-            mylogger.debug( "======debug-end===================")
-    
+            try:
+                mylogger.debug( "======debug-start================")
+                mylogger.debug("sess.maxread = %d" % sess.maxread)
+                mylogger.debug("sess.match =  " + str(sess.match.group(0)))
+                mylogger.debug( "=== sess.before:"+str([sess.before]))
+                mylogger.debug( "=== sess.after:"+str([sess.after]))
+                mylogger.debug( "======debug-end===================")
+            except AttributeError:
+                mylogger.debug("debug_sess except:%s "%str(e))
     def set_hostname(self):
         ex=re.compile(self.hostname_REGEX)
         m=re.search(ex,self.curPrompt)
@@ -220,7 +222,7 @@ class RMT_CONN:
                 
             #elif i == 3:
             elif expectKeys[i] == 'timeout':
-                print( self.host,"ssh got timeout"                )
+                print( self.host,"ssh got timeout")
                 self.debug_sess(self.ssh_sess)
                 exit_status = True;
             #elif i == 4:
