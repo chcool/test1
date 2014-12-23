@@ -60,7 +60,7 @@ class RMT_CONN:
                 mylogger.debug( "=== sess.before:"+str([sess.before]))
                 mylogger.debug( "=== sess.after:"+str([sess.after]))
                 mylogger.debug( "======debug-end===================")
-            except AttributeError:
+            except AttributeError as e:
                 mylogger.debug("debug_sess except:%s "%str(e))
     def set_hostname(self):
         ex=re.compile(self.hostname_REGEX)
