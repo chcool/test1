@@ -26,6 +26,8 @@ def sendcmd(host,cmd,cmdf,savef,username='calixsupport',password=''):
                 rest = host
             mylogger.info("res file = %s" % resf)
             resf = get_res_fname(resf)
+        else:
+            resf = savef
             
         if len(cmd.split(',')) > 1:
             sendcmdlist_wlog(conn,cmd.split(','),resf)
@@ -68,20 +70,23 @@ def action():
     commandfile=''
     savefile=''
 
+    #print(opthash)
+
     if opthash.cmd:
         #mylogger.log(7,"cmd = %s " % opthash.cmd)
         mylogger.debug("cmd = %s " % opthash.cmd)
         command = opthash.cmd
-    elif opthash.cmdf:
+    if opthash.cmdf:
         mylogger.info("cmd file = %s " % opthash.cmdf)
         commandfile = opthash.cmdf
-    elif opthash.save:
-        mylogger.debug("save to file argument = %s " %opthash.save)
+    if opthash.save:
+       savefile=opthash.save
+       mylogger.info("save to file argument = %s " %opthash.save)
 #        if opthash.save == "dflt":
 #            savefile = get_res_fname(
    
     for host_ip in hostlist:
-        t=Thread(target=sendcmd,args=(host_ip,command,commandfile,opthash.save))
+        t=Thread(target=sendcmd,args=(host_ip,command,commandfile,savefile))
         t.start() 
 #miao
     #sendunlock command"
