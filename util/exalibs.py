@@ -142,7 +142,7 @@ def processCmd(conn,cmd):
     return res,cmd
 
 
-def sendcmdlist_wlog(conn,cmdlist,logname):
+def sendcmdlist_wlog(conn,cmdlist,logname,prt=none):
     res = 0,
     ret = ''
     if logname != "":
