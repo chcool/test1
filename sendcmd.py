@@ -8,18 +8,19 @@ from util.exa_conf import get_res_fname
 from util.mylog import mylogger
 from os.path import basename
 
-def sendcmd(host,cmd,cmdf,savef,username='calixsupport',password=''):
+def sendcmd(host,cmd,cmdf,savef,prt,username='calixsupport',password=''):
     #get connection
     conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10,port=22)
     sess = conn.connect_ssh()
     hostname=conn.get_hostname()
 
     resf = "" 
-    
+   
+   # print(prt) 
 
     #send command
     if conn.getSessLogin():
-        if savef == "dflt" or savef == "":
+        if savef == "dflt" or savef is None:
             if len(cmdf)>1:
                 resf = host + "_" + basename(cmdf)
             else:
@@ -30,10 +31,10 @@ def sendcmd(host,cmd,cmdf,savef,username='calixsupport',password=''):
             resf = savef
             
         if len(cmd.split(',')) > 1:
-            sendcmdlist_wlog(conn,cmd.split(','),resf)
+            sendcmdlist_wlog(conn,cmd.split(','),resf,prt)
         elif len(cmd) > 1:
             #res,ret = conn.sendcmd(cmd)
-            res,ret=sendcmdlist_wlog(conn,[cmd],'')
+            res,ret=sendcmdlist_wlog(conn,[cmd],resf,prt)
             if res:
                 mylogger.info("===== %s(%s) =======" % (host,hostname))
                 mylogger.info(ret)
@@ -41,7 +42,7 @@ def sendcmd(host,cmd,cmdf,savef,username='calixsupport',password=''):
             
             mylogger.info("cmd file = %s" % cmdf)
             mylogger.info("res file = %s" % resf)
-            sendfile_wlog(conn,cmdf,resf)
+            sendfile_wlog(conn,cmdf,resf,prt)
           
     else:
         mylogger.error("%s is not reachable" % host
@@ -68,25 +69,27 @@ def action():
     opthash=parseCmd()
     command=''
     commandfile=''
-    savefile=''
+    savefile=None
 
-    #print(opthash)
+    print(opthash)
+    #sys.exit(2)
 
     if opthash.cmd:
         #mylogger.log(7,"cmd = %s " % opthash.cmd)
         mylogger.debug("cmd = %s " % opthash.cmd)
         command = opthash.cmd
+        
     if opthash.cmdf:
         mylogger.info("cmd file = %s " % opthash.cmdf)
         commandfile = opthash.cmdf
     if opthash.save:
-       savefile=opthash.save
+       savefile=opthash.savef
        mylogger.info("save to file argument = %s " %opthash.save)
 #        if opthash.save == "dflt":
 #            savefile = get_res_fname(
    
     for host_ip in hostlist:
-        t=Thread(target=sendcmd,args=(host_ip,command,commandfile,savefile))
+        t=Thread(target=sendcmd,args=(host_ip,command,commandfile,savefile,opthash.prt))
         t.start() 
 #miao
     #sendunlock command"
