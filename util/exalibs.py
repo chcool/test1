@@ -142,13 +142,14 @@ def processCmd(conn,cmd):
     return res,cmd
 
 
-def sendcmdlist_wlog(conn,cmdlist,logname,prt=none):
+def sendcmdlist_wlog(conn,cmdlist,logname,prt):
     res = 0,
     ret = ''
     if logname != "":
         f=open(logname,'a')
     else:
         f=None
+    mylogger.info(prt)
     
     if conn.getSessLogin():
  
@@ -160,20 +161,28 @@ def sendcmdlist_wlog(conn,cmdlist,logname,prt=none):
             if res == 0:
                 mylogger.debug( ">>>>>> about to send cmd %s <<<<<<\n"%cmd)
                 res,ret=conn.sendcmd(cmd)
-                if f:
+                '''if f:
                     f.write("\n==========\n%s==========\n"%cmd)
                 else:
                 # print to stdout
                     print(ret)
                     continue 
+                '''
 
-                if res and f:            
-                    f.write(cleanline(ret))    
-                    f.write("\n")
+                if res:            
+                    if f:
+                        f.write(cleanline(ret))    
+                        f.write("\n")
+                    if prt is True:
+                        print(ret)
                     #print( "<<<<<<<< ret = %s  >>>>>\n"%ret)
-                if ret.find('command not found') >=0:
-                    mylogger.error( "*** break!!! ****, got wrong prompt, correct " + cmdfile)
-                    break;
+                    if ret.find('command not found') >=0:
+                        mylogger.error( "*** break!!! ****, got wrong prompt, correct " + cmdfile)
+                        break;
+                else:
+                    if f:
+                        f.write("\n====== send \'%s\' failed!!! ====="%cmd)
+                        mylogger.error("====== send \'%s\' failed!!! ====="%cmd)
     else:
         if f:
             f.write("\n=== %s Login failed ===\n"%host1)
@@ -181,7 +190,7 @@ def sendcmdlist_wlog(conn,cmdlist,logname,prt=none):
         f.close()
     return res,ret
         
-def sendfile_wlog(conn,cmdfile,logname):
+def sendfile_wlog(conn,cmdfile,logname,prt=False):
     # if logname != "":
         # f=open(logname,'a')
     # else:
@@ -190,7 +199,7 @@ def sendfile_wlog(conn,cmdfile,logname):
     f1=open(cmdfile,'r')
     cmds =f1.readlines()
     f1.close()
-    sendcmdlist_wlog(conn,cmds,logname)
+    sendcmdlist_wlog(conn,cmds,logname,prt)
     
 
         
