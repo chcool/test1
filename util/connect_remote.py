@@ -20,6 +20,7 @@ class RMT_CONN:
             self.port = port
             self.loggedIn = False
 
+            self.connectstr = '%s -p %s -l%s %s' % (conmode,port,self.userid,self.host)
             self.ssh_sess = None
             self.serial_sess = None
             self.session = None
@@ -158,7 +159,8 @@ class RMT_CONN:
         expectList = self.expectList1    
         expectKeys = self.expectKeys
 
-        self.ssh_sess = pexpect.spawn('ssh -p %s -l%s %s' % (port,self.userid,self.host),maxread=4096)    
+        #self.ssh_sess = pexpect.spawn('ssh -p %s -l%s %s' % (port,self.userid,self.host),maxread=4096)    
+        self.ssh_sess = pexpect.spawn(connectstr,maxread=4096)    
         #self.ssh_sess.maxread=5120
         #print( "****** maxread = " + str(self.ssh_sess.maxread))
         
