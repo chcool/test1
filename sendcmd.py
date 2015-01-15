@@ -11,7 +11,7 @@ from os.path import basename
 def sendcmd(host,cmd,cmdf,savef,prt,username='calixsupport',password=''):
     #get connection
     conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10,port=22)
-    sess = conn.connect_ssh()
+    sess = conn.connect_node()
     hostname=conn.get_hostname()
 
     resf = "" 

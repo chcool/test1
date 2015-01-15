@@ -150,7 +150,7 @@ class RMT_CONN:
             # return self.session
        
     
-    def connect_ssh(self):
+    def connect_node(self):
         loggedIn = False
         exit_status = False
         self.ssh_sess = None
@@ -160,7 +160,7 @@ class RMT_CONN:
         expectKeys = self.expectKeys
 
         #self.ssh_sess = pexpect.spawn('ssh -p %s -l%s %s' % (port,self.userid,self.host),maxread=4096)    
-        self.ssh_sess = pexpect.spawn(connectstr,maxread=4096)    
+        self.ssh_sess = pexpect.spawn(self.connectstr,maxread=4096)    
         #self.ssh_sess.maxread=5120
         #print( "****** maxread = " + str(self.ssh_sess.maxread))
         
@@ -438,7 +438,7 @@ class RMT_CONN:
         self.loggedIn = False
         for i in range(0,maxtry):
             mylogger.info("reconnect retry %d"%i)
-            self.connect_ssh()
+            self.connect_node()
             if self.loggedIn:
                 break
             else:
