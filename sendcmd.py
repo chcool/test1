@@ -10,7 +10,10 @@ from os.path import basename
 
 def sendcmd(host,cmd,cmdf,savef,prt,username='calixsupport',password=''):
     #get connection
-    conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10,port=22)
+    conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10)
+    ## host,verbose=0,eqptype='EXA',conmode='ssh',userid='root', password='root',timeout=10,port=22,hostname=None
+    connectstr="telnet %s %s" % (host,'10022')
+    #conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10,connectstr=connectstr)
     sess = conn.connect_node()
     hostname=conn.get_hostname()
 

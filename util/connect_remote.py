@@ -7,7 +7,7 @@ from util.mylog import mylogger
 
 class RMT_CONN:
 
-    def __init__(self,host,verbose=0,eqptype='EXA',conmode='ssh',userid='root', password='root',timeout=10,port=22,hostname=None):
+    def __init__(self,host,verbose=0,eqptype='EXA',conmode='ssh',userid='root', password='root',timeout=10,port='0',hostname=None,connectstr=None):
             from util.exa_conf import MAX_MORE_LEN, EXPDICT
     
             self.eqptype=eqptype
@@ -19,8 +19,17 @@ class RMT_CONN:
             self.timeout=int(timeout)
             self.port = port
             self.loggedIn = False
-
-            self.connectstr = '%s -p %s -l%s %s' % (conmode,port,self.userid,self.host)
+            
+            if connectstr is not None:
+                self.connectstr=connectstr
+            else:
+                #self.connectstr = '%s -p %s -l%s %s' % (conmode,port,self.userid,self.host)
+                if port == '0':
+                    self.connectstr="%s -l %s %s" % (conmode,self.userid,self.host)
+                else:
+                    self.connectstr="%s -l %s %s %s" % (conmode,self.userid,self.host,port)
+            
+            
             self.ssh_sess = None
             self.serial_sess = None
             self.session = None
@@ -38,6 +47,7 @@ class RMT_CONN:
             self.hostname_REGEX = '\@(.*)\:'
             self.curPrompt=""
             self.hostname=hostname
+            self.crackarr=[]
     
             self.MAX_MORE_LEN=MAX_MORE_LEN
             
@@ -149,7 +159,32 @@ class RMT_CONN:
             # self.loggedIn = loggedIn
             # return self.session
        
-    
+    def setcrackarr(self,matchstr,pat):
+        
+        m=re.match(pat,matchstr)
+        if m:
+            self.crackarr = m.groups()[0].split()
+            if self.crackarr >= 6:
+                self.crackarr = self.crackarr[-6:]
+            else:
+                mylogger.error("crackarr = [%s] length < 6, not right, abort" % ' '.join(self.crackarr))
+                return False
+            
+            
+            hn = self.crackarr[0]    
+            if self.hostname != None and hn != self.hostname:
+                newts=' '.join(self.crackarr[1:])                
+                self.password=getecrack_py(hostname=self.hostname,ts=newts)
+            else:
+                self.password=getecrack_py(host_ts=' '.join(self.crackarr))
+            
+            return True
+        else:
+            mylogger.error(" === extract ecrack string seriously wrong, abort !!! ===")
+            #exist_status = True
+            return False
+        #sys.exit(2)
+                
     def connect_node(self):
         loggedIn = False
         exit_status = False
@@ -159,24 +194,40 @@ class RMT_CONN:
         expectList = self.expectList1    
         expectKeys = self.expectKeys
 
-        #self.ssh_sess = pexpect.spawn('ssh -p %s -l%s %s' % (port,self.userid,self.host),maxread=4096)    
+        #self.ssh_sess = pexpect.spawn('ssh -p %s -l%s %s' % (port,self.userid,self.host),maxread=4096)   
+        mylogger.info("connectstr=%s"%self.connectstr)
         self.ssh_sess = pexpect.spawn(self.connectstr,maxread=4096)    
         #self.ssh_sess.maxread=5120
-        #print( "****** maxread = " + str(self.ssh_sess.maxread))
-        
-        
         
         if int(self.verbose) >= 2:
             self.ssh_sess.logfile_read = sys.stdout
         
         while not exit_status:
             i = self.ssh_sess.expect(expectList)
-            #if i == 0:
+            
+            
+            if expectKeys[i].find('crackstr') >=0:
+                mylogger.debug("key=%s,pat=%s"%(expectKeys[i],expectList[i]))
+                pat=re.compile(expectList[i])
+                #res = self.setcrackarr((self.ssh_sess.after).decode("utf-8"),pat)
+                res = self.setcrackarr((self.ssh_sess.after),pat)
+                if  res is not True:
+                    self.exit_status = True
+                else:
+                    continue
+                
+                
             if expectKeys[i] == 'password':
                 self.debug_sess(self.ssh_sess)
+                
+                #the following need to be cleaned later
                 if self.userid == 'calixsupport' and (self.password == '' or self.password == 'root'):
-                    pat=re.compile("Calix distro \S*\d\.\d*\.\d*\.\d*\S* (.*)\r\n.*")
+                    '''#pat=re.compile("Calix distro \S*\d\.\d*\.\d*\.\d*\S* (.*)\r\n.*")
+                    # 2015.1.15 this works with ssh
                     pat=re.compile("Calix distro \S* (.*)\r\n.*")
+                    #pat_console=re.compile("Calix [^ ]+ (.*)\r\n.*")
+                    
+                    
                     m=re.search(pat,(self.ssh_sess.before).decode("utf-8"))
                     if m:
                         mylogger.debug(m.groups())
@@ -196,22 +247,29 @@ class RMT_CONN:
                                         self.password=getecrack_py(host_ts=m.groups()[0])
                         mylogger.debug( "hostname=%s"%self.hostname)
                     else:
-                        print( "didn't find crackstr!!!")
+                        mylogger.error( "didn't find crackstr!!!")
+                        exit_status = True
                 #sys.exit(2)
                 else:
                     pass
                     #print "self.userid is not calixsupport, it is: "+self.userid
+                '''
                 mylogger.info( "<<< v4 - sent userid/password = %s/%s >>>" %(self.userid, self.password))
                 sys.stdout.flush()
                 self.ssh_sess.send("%s\r" % self.password)                
                 continue
-            #elif i == 1:
+            
             elif expectKeys[i] == 'continue':
                 self.ssh_sess.send("yes\r")
                 continue
-            #elif i == 2 or i==7:
+            elif expectKeys[i] == 'escape':
+                self.ssh_sess.send('\n')
+                continue
+            elif expectKeys[i] == 'login':
+                self.ssh_sess.sendline(self.userid)
+                continue
             elif expectKeys[i] == 'cliprompt' or expectKeys[i] == 'cliprompt2':
-            #elif i == 2 :
+            
                 loggedIn = True;
                 exit_status = True;
                 
@@ -222,20 +280,24 @@ class RMT_CONN:
                 mylogger.debug( "<<<<<< hostname = " + self.hostname)
                 self.debug_sess(self.ssh_sess)
                 
-            #elif i == 3:
+            
             elif expectKeys[i] == 'timeout':
                 print( self.host,"ssh got timeout")
                 self.debug_sess(self.ssh_sess)
                 exit_status = True;
-            #elif i == 4:
+            
             elif expectKeys[i] == 'logindenied':
                 print( "login Denied with userid/password %s/%s!!!\r" % (self.userid,self.password))
                 loggedIn = False;
                 exit_status = True;
-            #elif i == 6:
+            elif expectKeys[i] == 'portbusy':
+                mylogger.error( "=== iolan port busy, please release it, abort !!! ====\n")
+                loggedIn = False;
+                exit_status = True;
             elif expectKeys[i] == 'eof':
             
-                print( "\n===== ssh got pexpect.EOF, might be network issue ====\n")
+                mylogger.error( "\n===== ssh got pexpect.EOF, might be network issue ====\n")
+                
                 exit_status = True;
             else:
                 print( 'unexpected event during ssh: ')
