@@ -160,11 +160,11 @@ class RMT_CONN:
             # return self.session
        
     def setcrackarr(self,matchstr,pat):
-        
+        print(matchstr)
         m=re.match(pat,matchstr)
         if m:
             self.crackarr = m.groups()[0].split()
-            if self.crackarr >= 6:
+            if len(self.crackarr) >= 6:
                 self.crackarr = self.crackarr[-6:]
             else:
                 mylogger.error("crackarr = [%s] length < 6, not right, abort" % ' '.join(self.crackarr))
@@ -210,7 +210,7 @@ class RMT_CONN:
                 mylogger.debug("key=%s,pat=%s"%(expectKeys[i],expectList[i]))
                 pat=re.compile(expectList[i])
                 #res = self.setcrackarr((self.ssh_sess.after).decode("utf-8"),pat)
-                res = self.setcrackarr((self.ssh_sess.after),pat)
+                res = self.setcrackarr((self.ssh_sess.after).decode("utf-8"),pat)
                 if  res is not True:
                     self.exit_status = True
                 else:
