@@ -177,7 +177,7 @@ def sendcmdlist_wlog(conn,cmdlist,logname,prt):
                         print(ret)
                     #print( "<<<<<<<< ret = %s  >>>>>\n"%ret)
                     if ret.find('command not found') >=0:
-                        mylogger.error( "*** break!!! ****, got wrong prompt, correct " + cmdfile)
+                        mylogger.error( "*** break!!! ****, got wrong prompt, correct " + cmd)
                         break;
                 else:
                     if f:
