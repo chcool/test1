@@ -27,9 +27,10 @@ def sendcmd(host,cmd,cmdf,savef,prt,username='calixsupport',password=''):
             if len(cmdf)>1:
                 resf = host + "_" + basename(cmdf)
             else:
-                rest = host
-            mylogger.info("res file = %s" % resf)
+                resf = host            
             resf = get_res_fname(resf)
+            mylogger.info("res file = %s" % resf)
+            
         else:
             resf = savef
             
@@ -85,12 +86,12 @@ def action():
     if opthash.cmdf:
         mylogger.info("cmd file = %s " % opthash.cmdf)
         commandfile = opthash.cmdf
-    if opthash.save:
+    if opthash.savef:
        savefile=opthash.savef
        mylogger.info("save to file argument = %s " %opthash.save)
-#        if opthash.save == "dflt":
-#            savefile = get_res_fname(
-   
+    elif opthash.save:
+        savefile="dflt"
+#   
     for host_ip in hostlist:
         t=Thread(target=sendcmd,args=(host_ip,command,commandfile,savefile,opthash.prt))
         t.start() 
