@@ -16,4 +16,4 @@ else
    echo "use python2"
 fi
 
-eval "$PYTHON climain.py -a sendcmd.action -m 'show ver' -l \"$1\""
+eval "$PYTHON climain.py -a sendcmd.action -m 'show ver' -l \"$1\" -p"
