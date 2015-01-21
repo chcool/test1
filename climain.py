@@ -63,6 +63,8 @@ if __name__ == "__main__":
         try:
             func = getattr(mod,act_func)
             func()
-        except AttributeError:
+        except AttributeError as e:
             mylogger.info("no function with name = %s in %s" % (act_func,act_mod)) 
+            import traceback
+            traceback.print_exc()
             sys.exit(2)

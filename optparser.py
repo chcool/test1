@@ -77,12 +77,16 @@ def parseHostlist():
 #called by sendcmd.py
 def parseCmd():
     parser = argparse.ArgumentParser()
+    
+    parser.add_argument("-u","--user",default=None,help="login user id")
+    parser.add_argument("-w","--pw",default=None,help="login password")
+    
     parser.add_argument("-m","--cmd",help="command to be sent")
     parser.add_argument("-f","--cmdf",help="command file to be sent")
     parser.add_argument("-s","--save",action='store_true',default=None,help="wether result of send command should be saved to file, dflt means default")
     parser.add_argument("-sf","--savef",default=None,help="wether result of send command should be saved to file, dflt means default")
 
-    parser.add_argument("-p","--prt",action='store_true',help="if result will be printed on console")
+    parser.add_argument("-n","--noprt",action='store_true',help="if result will be printed on console")
     args,unknown = parser.parse_known_args()
     return args
 

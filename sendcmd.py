@@ -23,7 +23,7 @@ def sendcmd(host,cmd,cmdf,savef,prt,username='calixsupport',password=''):
 
     #send command
     if conn.getSessLogin():
-        if savef == "dflt" or savef is None:
+        if savef == "dflt":
             if len(cmdf)>1:
                 resf = host + "_" + basename(cmdf)
             else:
@@ -31,7 +31,7 @@ def sendcmd(host,cmd,cmdf,savef,prt,username='calixsupport',password=''):
             resf = get_res_fname(resf)
             mylogger.info("res file = %s" % resf)
             
-        else:
+        elif savef is not None:
             resf = savef
             
         if len(cmd.split(',')) > 1:
@@ -59,9 +59,6 @@ def sendcmd(host,cmd,cmdf,savef,prt,username='calixsupport',password=''):
 def action():
     mylogger.debug( "###### in sendcmd v2 ########")
 
-#    opthash=parseHostlist()
-#    if opthash.hlist:
-
     hostlist = getHostlist_fromOpt()
     if len(hostlist) > 0:
         mylogger.info("hostlist = %s" % ','.join(hostlist))
@@ -74,6 +71,7 @@ def action():
     command=''
     commandfile=''
     savefile=None
+    prt=True
 
     print(opthash)
     #sys.exit(2)
@@ -92,8 +90,10 @@ def action():
     elif opthash.save:
         savefile="dflt"
 #   
+    if opthash.noprt is True:
+        prt = False
     for host_ip in hostlist:
-        t=Thread(target=sendcmd,args=(host_ip,command,commandfile,savefile,opthash.prt))
+        t=Thread(target=sendcmd,args=(host_ip,command,commandfile,savefile,prt))
         t.start() 
 #miao
     #sendunlock command"
