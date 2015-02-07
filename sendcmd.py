@@ -8,12 +8,14 @@ from util.exa_conf import get_res_fname
 from util.mylog import mylogger
 from os.path import basename
 
-def sendcmd(host,cmd,cmdf,savef,prt,username='calixsupport',password=''):
+def sendcmd(host,cmd,cmdf,savef,prt,username,password,connectstr):
     #get connection
-    conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10)
+    #conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10)
     ## host,verbose=0,eqptype='EXA',conmode='ssh',userid='root', password='root',timeout=10,port=22,hostname=None
-    connectstr="telnet %s %s" % (host,'10022')
-    #conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10,connectstr=connectstr)
+    #connectstr="telnet %s %s" % (host,'10022')
+    #connectstr="telnet %s" % (host)
+    mylogger.info("connect str = %s" % connectstr)
+    conn = RMT_CONN(verbose=0,host=host,userid=username,password=password,timeout=10,connectstr=connectstr)
     sess = conn.connect_node()
     hostname=conn.get_hostname()
 
@@ -57,7 +59,7 @@ def sendcmd(host,cmd,cmdf,savef,prt,username='calixsupport',password=''):
        
 
 def action():
-    mylogger.debug( "###### in sendcmd v2 ########")
+    mylogger.debug( "###### in sendcmd v3 ########")
 
     hostlist = getHostlist_fromOpt()
     if len(hostlist) > 0:
@@ -92,8 +94,34 @@ def action():
 #   
     if opthash.noprt is True:
         prt = False
+
+    userid='calixsupport'
+    password=''
+
+    if opthash.user:
+        mylogger.info("user Userid = %s" % opthash.user)
+        userid=opthash.user
+
+    if opthash.pw:
+        mylogger.info("login pw = %s" % opthash.pw)
+        password=opthash.pw
+
+    constr='ssh -l '+userid
+    port=None
+
+    if opthash.constr:
+        constr=opthash.constr 
+
+    if opthash.port:
+        port = opthash.port 
+
     for host_ip in hostlist:
-        t=Thread(target=sendcmd,args=(host_ip,command,commandfile,savefile,prt))
+        constr = constr + ' ' + host_ip
+
+        if port:
+            constr = constr + ' ' + port 
+        
+        t=Thread(target=sendcmd,args=(host_ip,command,commandfile,savefile,prt,userid,password,constr))
         t.start() 
 #miao
     #sendunlock command"

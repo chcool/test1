@@ -1,10 +1,10 @@
 {"cmdfile_base":"cmd/",
-"log_base":"/tmp/log/",
+"log_base":"/tmp/log",
 "log_level":"20",
 "MAX_WAIT":"100",
 "SLEEP_DL":"15",
 "SLEEP_RB":"50",
-"MAX_MORE_LEN":"50000",
+"MAX_MORE_LEN":"150000",
 "EXPDICT":{
 "cliprompt":"'([^\r\n]+)([#|>] )$'",
 "cliprompt2":"([\r\n|\b+][\\w|\\W]+([#|>] )$)",

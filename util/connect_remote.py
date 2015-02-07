@@ -64,15 +64,15 @@ class RMT_CONN:
 
     def debug_sess(self,sess):
         if int(self.verbose) >= 0:
+            mylogger.debug( "======debug-start================")
+            mylogger.debug("sess.maxread = %d" % sess.maxread)
             try:
-                mylogger.debug( "======debug-start================")
-                mylogger.debug("sess.maxread = %d" % sess.maxread)
                 mylogger.debug("sess.match =  " + str(sess.match.group(0)))
-                mylogger.debug( "=== sess.before:"+str([sess.before]))
-                mylogger.debug( "=== sess.after:"+str([sess.after]))
-                mylogger.debug( "======debug-end===================")
             except AttributeError as e:
                 mylogger.debug("debug_sess except:%s "%str(e))
+            mylogger.debug( "=== sess.before:"+str([sess.before]))
+            mylogger.debug( "=== sess.after:"+str([sess.after]))
+            mylogger.debug( "======debug-end===================")
     def set_hostname(self):
         ex=re.compile(self.hostname_REGEX)
         m=re.search(ex,self.curPrompt)
@@ -203,7 +203,9 @@ class RMT_CONN:
             self.ssh_sess.logfile_read = sys.stdout
         
         while not exit_status:
+            mylogger.debug("============= expect started =============")
             i = self.ssh_sess.expect(expectList)
+            mylogger.debug("======== expected key = %s =============" % expectKeys[i])
             
             
             if expectKeys[i].find('crackstr') >=0:
@@ -255,18 +257,21 @@ class RMT_CONN:
                     #print "self.userid is not calixsupport, it is: "+self.userid
                 '''
                 mylogger.info( "<<< v4 - sent userid/password = %s/%s >>>" %(self.userid, self.password))
-                sys.stdout.flush()
-                self.ssh_sess.send("%s\r" % self.password)                
+                #sys.stdout.flush()
+                #self.ssh_sess.send("%s\r" % self.password.decode("utf-8"))                
+                self.ssh_sess.sendline(self.password)
                 continue
             
+            elif expectKeys[i] == 'login':
+                self.debug_sess(self.ssh_sess)
+                mylogger.debug("<<<< get login prompt >>")
+                self.ssh_sess.sendline(self.userid)
+                continue
             elif expectKeys[i] == 'continue':
                 self.ssh_sess.send("yes\r")
                 continue
             elif expectKeys[i] == 'escape':
                 self.ssh_sess.send('\n')
-                continue
-            elif expectKeys[i] == 'login':
-                self.ssh_sess.sendline(self.userid)
                 continue
             elif expectKeys[i] == 'cliprompt' or expectKeys[i] == 'cliprompt2':
             
@@ -476,6 +481,7 @@ class RMT_CONN:
                 #elif i == 3:
                 elif expectKeys[i] == 'timeout':
                     mylogger.debug(" timeout,retry = %d " % retry)
+                    self.debug_sess(sess)
                     #print " timeout send_ret length is: " + str(len(sent_ret))+"\n" +\
                     #    "SESS.AFTER: "+str(sess.after)+ \
                     #    ";\n SESS.BEFORE: \n"+\

@@ -77,7 +77,10 @@ def parseHostlist():
 #called by sendcmd.py
 def parseCmd():
     parser = argparse.ArgumentParser()
-    
+   
+    parser.add_argument("-c","--constr",default=None,help="connect str part 1: telent or ssh -l  ")
+    parser.add_argument("--port",default=None,help="connect port")
+
     parser.add_argument("-u","--user",default=None,help="login user id")
     parser.add_argument("-w","--pw",default=None,help="login password")
     
@@ -93,7 +96,7 @@ def parseCmd():
 #2014.11.25 - not called 
 def parseCfg():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c","--cfg",help="json config file,not implemented ")
+    parser.add_argument("-t","--tpl",default=None,help="json config file,not implemented ")
     args,unknown = parser.parse_known_args()
     return args
 

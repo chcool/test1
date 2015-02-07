@@ -14,11 +14,27 @@ hostmap['shana4']='10.2.31.154'
 hostmap['shana5']='10.2.31.155'
 hostmap['shana6']='10.2.31.156'
 
+import argparse
+
+#2014.11.25 - not called
+def parseCfg():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t","--tpl",default=None,help="json config file,not implemented ")
+    args,unknown = parser.parse_known_args()
+    return args
+
+
 import json,os
 RUN_DIR = os.getcwd()
 
-print( "trying to find exa_conf.json in " + RUN_DIR)
-EXA_CONF=RUN_DIR+'/exa_conf.json'
+opthash=parseCfg()
+
+template='exa_conf.json'
+if opthash.tpl:
+    template=opthash.tpl
+
+print( "trying to find template file in " + RUN_DIR)
+EXA_CONF=RUN_DIR+'/'+template
 with open(EXA_CONF) as data_file:
 	data=json.load(data_file)
 
