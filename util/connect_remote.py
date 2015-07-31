@@ -63,7 +63,8 @@ class RMT_CONN:
         self.expectList1[2]=re.compile(prompt)
 
     def debug_sess(self,sess):
-        if int(self.verbose) >= 0:
+        #if int(self.verbose) >= 0:
+        if 1==1:
             mylogger.debug( "======debug-start================")
             mylogger.debug("sess.maxread = %d" % sess.maxread)
             try:
@@ -195,7 +196,7 @@ class RMT_CONN:
         expectKeys = self.expectKeys
 
         #self.ssh_sess = pexpect.spawn('ssh -p %s -l%s %s' % (port,self.userid,self.host),maxread=4096)   
-        mylogger.info("connectstr=%s"%self.connectstr)
+        mylogger.info("connectstr=%s,userid=%s,password=%s"%(self.connectstr,self.userid,self.password))
         self.ssh_sess = pexpect.spawn(self.connectstr,maxread=4096)    
         #self.ssh_sess.maxread=5120
         
@@ -209,15 +210,16 @@ class RMT_CONN:
             
             
             if expectKeys[i].find('crackstr') >=0:
-                mylogger.debug("key=%s,pat=%s"%(expectKeys[i],expectList[i]))
-                pat=re.compile(expectList[i])
-                #res = self.setcrackarr((self.ssh_sess.after).decode("utf-8"),pat)
-                res = self.setcrackarr((self.ssh_sess.after).decode("utf-8"),pat)
-                if  res is not True:
-                    self.exit_status = True
-                else:
-                    continue
-                
+                if self.userid == 'calixsupport':
+                    mylogger.debug("key=%s,pat=%s"%(expectKeys[i],expectList[i]))
+                    pat=re.compile(expectList[i])
+                    #res = self.setcrackarr((self.ssh_sess.after).decode("utf-8"),pat)
+                    res = self.setcrackarr((self.ssh_sess.after).decode("utf-8"),pat)
+                    if  res is not True:
+                        self.exit_status = True
+                    else:
+                        continue
+                continue 
                 
             if expectKeys[i] == 'password':
                 self.debug_sess(self.ssh_sess)
@@ -254,7 +256,7 @@ class RMT_CONN:
                 #sys.exit(2)
                 else:
                     pass
-                    #print "self.userid is not calixsupport, it is: "+self.userid
+                    print "self.userid is not calixsupport, it is: "+self.userid
                 '''
                 mylogger.info( "<<< v4 - sent userid/password = %s/%s >>>" %(self.userid, self.password))
                 #sys.stdout.flush()
@@ -306,7 +308,7 @@ class RMT_CONN:
                 exit_status = True;
             else:
                 print( 'unexpected event during ssh: ')
-                print( "got "+expectKeys[i]+","+self.session.before)
+                print( "got "+expectKeys[i]+"="+str(self.ssh_sess.before))
                 exit_status = True;
             
         if loggedIn:
@@ -494,8 +496,12 @@ class RMT_CONN:
                         exit_flag = True
                     else:
                         sess.send('\n')
+                elif expectKeys[i] == 'escape':
+                    mylogger.error( "get Escape in sendcommand, wierd, continue !!!!")
+                    pass 
                 else:
                     mylogger.error( "get unexpected result = "+ expectKeys[i])
+                    self.debug_sess(sess)
                     exit_flag = True
                     sent_res = True
                     sent_ret=str(expectList[i])
