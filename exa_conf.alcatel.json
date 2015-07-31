@@ -4,7 +4,7 @@
 "MAX_WAIT":"100",
 "SLEEP_DL":"15",
 "SLEEP_RB":"50",
-"MAX_MORE_LEN":"1500",
+"MAX_MORE_LEN":"1500000",
 "EXPDICT":{
 "cliprompt":"\\**\\r\\n([\\w_-]+)([#|>] )",
 "cliprompt2":"([\r\n|\b+][\\w|\\W]+([#|>] )$)",
