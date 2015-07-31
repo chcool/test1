@@ -127,10 +127,15 @@ def processCmd(conn,cmd):
                 param = explist[1]
                 conn.addMatch(param)
         elif cmd1.lower().find('@wait') >=0:
-            explist=cmd.split()
+            print("get wait %s"%cmd1)
+            explist=cmd1.split()
             if len(explist) >=2:
                 wait=explist[1]
+                mylogger.debug("current time is: %s " % time.asctime(time.localtime()))
                 time.sleep(int(wait))
+                mylogger.debug("current time is: %s " % time.asctime(time.localtime()))
+            else:
+                mylogger.error("%s doesn't have correct wait format" % cmd1)
         elif cmd1.lower().find('@reload') >=0:
             # note, can't name the function reload, seems it is a reserved name.
             conn.restart()
