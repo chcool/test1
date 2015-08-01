@@ -95,6 +95,12 @@ def sendfile(conn,cmdfile):
             #res,ret=conn.sendcmd(cmd)
             res,ret=sendandprint(conn,cmd)
 
+# input: conn and cmd
+# output: res and cmd
+#         res: 0 normal command, 
+#              1: comment or flow control command, skip
+#              
+
 def processCmd(conn,cmd):
     res = 0
     cmd1 = cmd.strip()
@@ -142,28 +148,76 @@ def processCmd(conn,cmd):
             
         elif cmd1.find('@reconnect') >=0:
             conn.reconnect()
+        elif cmd1.find('@loop_start') >=0:
+            res = 2
+            explist=cmd1.split()
+            cmd = '0'
+            if len(explist) >=2:
+                cmd = explist[1]
+        elif cmd1.find('@loop_end') >=0:
+            res = 3
+            cmd =''    
             
         
     return res,cmd
 
 
 def sendcmdlist_wlog(conn,cmdlist,logname,prt):
+    
     res = 0,
     ret = ''
+    cmdlen=len(cmdlist)
+    if cmdlen <= 0:
+        return res,ret
     if logname != "":
         f=open(logname,'a')
     else:
         f=None
     mylogger.info(prt)
     
+    cmdidx = 0
     if conn.getSessLogin():
  
-        
-        for cmd in cmdlist:
+        loopstart = -1 
+        loopend = -1
+        looprepeat = 0
+        exetimes = 0
+
+        while cmdidx < cmdlen:
+            cmd=cmdlist[cmdidx]
             res,cmd=processCmd(conn,cmd)
             mylogger.debug("res=%d, cmd=%s" % (res,cmd))
-           
-            if res == 0:
+            cmdidx = cmdidx + 1 
+
+            #loop start,cmd should be the repeat times
+            if res == 2:
+                if loopstart == -1:
+                    loopstart = cmdidx
+                    looprepeat = int(cmd)
+                else:
+                    mylogger.error("cmd index %s has loop_start after loop_start without loop_end, not supported !!!" % str(cmdidx-1))
+                    cmdidx = cmdlen
+                continue
+            #loop end
+            elif res == 3:
+                if loopstart == -1:
+                    mylogger.error("cmd index %s has loop_end without loop_start begin with" % str(cmdidx-1))
+                    continue
+                elif loopstart >= (cmdidx-1):
+                    mylogger.error("cmd index %s has loop_end come before loop_start" % str(cmdidx-1) )
+                    continue
+                else:
+            #        loopend = cmdidx -1 
+                    exetimes = exetimes + 1
+                    if exetimes >= looprepeat:
+                        looprepeat = 0
+                        loopstart = -1
+                        loopend = -1
+                        exetimes = 0
+                    else:
+                        cmdidx = loopstart
+                continue 
+            elif res == 0:
                 mylogger.debug( ">>>>>> about to send cmd %s <<<<<<\n"%cmd)
                 res,ret=conn.sendcmd(cmd)
                 '''if f:
