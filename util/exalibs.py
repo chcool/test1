@@ -157,6 +157,10 @@ def processCmd(conn,cmd):
         elif cmd1.find('@loop_end') >=0:
             res = 3
             cmd =''    
+        elif cmd1.find('@entcli') >=0:
+            conn.entCLI()
+        elif cmd1.find('@entlinux') >=0:
+            conn.entLinux()
             
         
     return res,cmd
